@@ -43,7 +43,7 @@ public abstract class ThreadedSocket extends BasicSocket
 	/**
 	 * A thread-safe way to get a message through the socket
 	 */
-	public synchronized final Serializable getSocketMessage()
+	protected synchronized final Serializable getSocketMessage()
 	{
 		return super.getSocketMessage();
 	} /* end getSocketMessage method */
@@ -51,7 +51,7 @@ public abstract class ThreadedSocket extends BasicSocket
 	/**
 	 * A thread-safe way to send a message through the socket
 	 */
-	public synchronized final void sendSocketMessage(Serializable message)
+	protected synchronized final void sendSocketMessage(Serializable message)
 	{
 		super.sendSocketMessage(message);
 	} /* end sendSocketMessage method */

@@ -63,7 +63,7 @@ public abstract class BasicSocket implements Runnable
 		
 	} /* end closeServerSocket method */
 	
-	public void sendSocketMessage(Serializable message)
+	protected void sendSocketMessage(Serializable message)
 	{// TODO Change to correct input
 		try 
 		{
@@ -78,7 +78,7 @@ public abstract class BasicSocket implements Runnable
 		
 	} /* end sendSocketMessage method */
 	
-	public Serializable getSocketMessage()
+	protected Serializable getSocketMessage()
 	{// TODO Change to correct return
 		Serializable message = null;
 		

@@ -53,6 +53,7 @@ public abstract class Message
 	 * Constructs a message with the given type and payload. Note that the only
 	 * messages that provide an int type payload are:
 	 * HAVE
+	 * BITFIELD
 	 * REQUEST
 	 * PIECE
 	 * According to the specification, these payloads will always be 4 bytes. 

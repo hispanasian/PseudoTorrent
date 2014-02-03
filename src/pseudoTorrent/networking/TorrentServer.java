@@ -1,10 +1,8 @@
 package pseudoTorrent.networking;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-
 import pseudoTorrent.PseudoTorrent;
 
 /**
@@ -19,7 +17,7 @@ public class TorrentServer implements Runnable
 	/******************* Class Attributes *******************/
 	private final PseudoTorrent torrent;
 	private final ServerSocket server;
-	private boolean done;
+	private volatile boolean done;
 	
 	/******************* Class Methods 
 	 * @throws IOException *******************/
@@ -39,11 +37,8 @@ public class TorrentServer implements Runnable
 			{
 				Socket socket = null;
 				socket = server.accept();
-				if(socket != null)
-				{
-					new Thread(new TorrentSocket(torrent, socket)).start();
-				} /* end if */
-			} 
+				if(socket != null) new TorrentSocket(torrent, socket).start();
+			} /* end try */
 			catch (Exception e) 
 			{
 				// TODO Auto-generated catch block
@@ -54,13 +49,16 @@ public class TorrentServer implements Runnable
 		
 	} /* end run method */
 	
+	/**
+	 * Terminates the TorrentServer
+	 */
 	public void close()
 	{
 		this.done = true;
 		try 
 		{
 			this.server.close();
-		} 
+		} /* end try */
 		catch (IOException e) {/* ignore */}
 	} /* end close method */
 	

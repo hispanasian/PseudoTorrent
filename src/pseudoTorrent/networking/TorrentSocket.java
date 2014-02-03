@@ -1,11 +1,8 @@
 package pseudoTorrent.networking;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
+
 import pseudoTorrent.PseudoTorrent;
-import pseudoTorrent.messages.Message;
 
 /**
  * The TorrentSocket class will perform the socket functionality necessary for
@@ -16,23 +13,19 @@ import pseudoTorrent.messages.Message;
  * @author Carlos Vasquez
  *
  */
-public class TorrentSocket implements Runnable
+public class TorrentSocket extends ThreadedSocket
 {
-	/******************* Class Methods *******************/
+	/******************* Class Attributes *******************/
 	private final PseudoTorrent torrent;
-	private final Socket socket;
-	private ObjectInputStream input = null;
-	protected ObjectOutputStream output = null;
 	
 	/******************* Class Methods *******************/
-	public TorrentSocket(final PseudoTorrent torrent, final Socket socket)
+	public TorrentSocket(PseudoTorrent torrent, final Socket socket)
 	{
+		super(socket);
 		this.torrent = torrent;
-		this.socket = socket;
-		this.createStreams();
 		
 	} /* end constructor */
-	
+
 	@Override
 	public void run() 
 	{
@@ -41,71 +34,4 @@ public class TorrentSocket implements Runnable
 		this.closeStreams();
 	} /* end run method */
 	
-	/**
-	 * Creates the output and input streams
-	 */
-	protected void createStreams()
-	{
-		try 
-		{
-			this.output = new ObjectOutputStream(this.socket.getOutputStream());
-			this.input = new ObjectInputStream(this.socket.getInputStream());
-		} /* end try */ 
-		catch (IOException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} /* end catch */
-	} /* end createStreams method */
-	
-	/**
-	 * Closes the output and input streams
-	 */
-	protected void closeStreams()
-	{
-		try 
-		{
-			this.output.close();
-			this.input.close();
-		} /* end try */ 
-		catch (IOException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} /* end catch */
-		
-	} /* end closeServerSocket method */
-	
-	protected void sendMessage(byte message)
-	{// TODO Change to correct input
-		try 
-		{
-			this.output.writeObject(message);
-			this.output.flush();
-		} /* end try */
-		catch (IOException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} /* end catch */
-		
-	} /* end sendSocketMessage method */
-	
-	protected byte getSocketMessage()
-	{// TODO Change to correct return
-		byte message = 0;
-		
-		try
-		{
-			message = (byte) this.input.readObject();
-		} /* end try */
-		catch(IOException | ClassNotFoundException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} /* end catch */
-		
-		return(message);
-	} /* end getSocketMessage method */
-
 } /* end TorrentSocket class */

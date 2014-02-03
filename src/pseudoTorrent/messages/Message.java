@@ -44,12 +44,9 @@ public abstract class Message
 	} /* end Type enum */
 	
 	/******************* Class Attributes *******************/
-	public final int length;
+	public final Integer length;
 	public final Type type;
 	public final byte[] payload;
-	
-	/******************* Abstract Methods *******************/
-
 	
 	/******************* Class Methods *******************/
 	/**

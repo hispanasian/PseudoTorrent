@@ -1,6 +1,7 @@
 package pseudoTorrent.networking;
 
 import java.net.Socket;
+import java.net.SocketException;
 
 import pseudoTorrent.PseudoTorrent;
 
@@ -15,15 +16,19 @@ import pseudoTorrent.PseudoTorrent;
  */
 public class TorrentSocket extends ThreadedSocket
 {
+	/******************* Class Constants *******************/
+	public static final int TIMEOUT = 1000;
+	
 	/******************* Class Attributes *******************/
 	private final PseudoTorrent torrent;
 	
-	/******************* Class Methods *******************/
-	public TorrentSocket(PseudoTorrent torrent, final Socket socket)
+	/******************* Class Methods 
+	 * @throws SocketException *******************/
+	public TorrentSocket(PseudoTorrent torrent, final Socket socket) throws SocketException
 	{
 		super(socket);
 		this.torrent = torrent;
-		
+		this.socket.setSoTimeout(TIMEOUT);
 	} /* end constructor */
 
 	@Override

@@ -17,7 +17,6 @@ public class TorrentServer implements Runnable
 	/******************* Class Attributes *******************/
 	private final PseudoTorrent torrent;
 	private final ServerSocket server;
-	private volatile boolean done;
 	
 	/******************* Class Methods 
 	 * @throws IOException *******************/
@@ -25,13 +24,12 @@ public class TorrentServer implements Runnable
 	{
 		this.torrent = torrent;
 		this.server = new ServerSocket(port);
-		this.done = false;
 	} /* end TorrentServer method */
 
 	@Override
 	public void run() 
 	{
-		while(!done)
+		while(!Thread.interrupted())
 		{
 			try 
 			{
@@ -48,18 +46,5 @@ public class TorrentServer implements Runnable
 		} /* end while loop */
 		
 	} /* end run method */
-	
-	/**
-	 * Terminates the TorrentServer
-	 */
-	public void close()
-	{
-		this.done = true;
-		try 
-		{
-			this.server.close();
-		} /* end try */
-		catch (IOException e) {/* ignore */}
-	} /* end close method */
 	
 } /* end TorrentServer */

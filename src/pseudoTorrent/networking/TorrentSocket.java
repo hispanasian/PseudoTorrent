@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-
-import DD.Message.NetworkMessage;
 import pseudoTorrent.PseudoTorrent;
 import pseudoTorrent.messages.Message;
 
@@ -101,8 +99,9 @@ public class TorrentSocket implements Runnable
 		{
 			message = (byte) this.input.readObject();
 		} /* end try */
-		catch(IOException e)
+		catch(IOException | ClassNotFoundException e)
 		{
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} /* end catch */
 		

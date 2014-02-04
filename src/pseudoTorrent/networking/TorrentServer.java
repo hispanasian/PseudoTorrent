@@ -39,7 +39,7 @@ public class TorrentServer implements Runnable
 			} /* end try */
 			catch (Exception e) 
 			{
-				// TODO Auto-generated catch block
+				// TODO Decide what to do for exception
 				e.printStackTrace();
 			} /* end catch */
 

@@ -1,5 +1,6 @@
 package pseudoTorrent.networking;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
 
@@ -15,7 +16,7 @@ public abstract class ThreadedSocket extends BasicSocket
 	protected final Thread thread;
 	
 	/******************* Class Methods *******************/
-	public ThreadedSocket(Socket socket) 
+	public ThreadedSocket(Socket socket) throws IOException 
 	{
 		super(socket);
 		this.thread = new Thread(this);
@@ -41,7 +42,7 @@ public abstract class ThreadedSocket extends BasicSocket
 	/**
 	 * A thread-safe way to get a message through the socket
 	 */
-	protected synchronized final Serializable getSocketMessage()
+	protected synchronized final Serializable getSocketMessage() throws ClassNotFoundException, IOException
 	{
 		return super.getSocketMessage();
 	} /* end getSocketMessage method */
@@ -49,7 +50,7 @@ public abstract class ThreadedSocket extends BasicSocket
 	/**
 	 * A thread-safe way to send a message through the socket
 	 */
-	protected synchronized final void sendSocketMessage(Serializable message)
+	protected synchronized final void sendSocketMessage(Serializable message) throws IOException
 	{
 		super.sendSocketMessage(message);
 	} /* end sendSocketMessage method */

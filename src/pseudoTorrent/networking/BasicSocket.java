@@ -21,7 +21,7 @@ public abstract class BasicSocket implements Runnable
 	private ObjectOutputStream output = null;
 	
 	/******************* Class Methods *******************/
-	public BasicSocket(final Socket socket)
+	public BasicSocket(final Socket socket) throws IOException
 	{
 		this.socket = socket;
 		this.createStreams();
@@ -31,67 +31,33 @@ public abstract class BasicSocket implements Runnable
 	/**
 	 * Creates the output and input streams
 	 */
-	protected final void createStreams()
+	protected final void createStreams() throws IOException
 	{
-		try 
-		{
-			this.output = new ObjectOutputStream(this.socket.getOutputStream());
-			this.input = new ObjectInputStream(this.socket.getInputStream());
-		} /* end try */ 
-		catch (IOException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} /* end catch */
+		this.output = new ObjectOutputStream(this.socket.getOutputStream());
+		this.input = new ObjectInputStream(this.socket.getInputStream());
 	} /* end createStreams method */
 	
 	/**
 	 * Closes the output and input streams
 	 */
-	protected final void closeStreams()
+	protected final void closeStreams() throws IOException
 	{
-		try 
-		{
-			this.output.close();
-			this.input.close();
-		} /* end try */ 
-		catch (IOException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} /* end catch */
+		this.output.close();
+		this.input.close();
 		
 	} /* end closeServerSocket method */
 	
-	protected void sendSocketMessage(Serializable message)
+	protected void sendSocketMessage(Serializable message) throws IOException
 	{// TODO Change to correct input
-		try 
-		{
-			this.output.writeObject(message);
-			this.output.flush();
-		} /* end try */
-		catch (IOException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} /* end catch */
-		
+		this.output.writeObject(message);
+		this.output.flush();
+
 	} /* end sendSocketMessage method */
 	
-	protected Serializable getSocketMessage()
+	protected Serializable getSocketMessage() throws ClassNotFoundException, IOException
 	{// TODO Change to correct return
 		Serializable message = null;
-		
-		try
-		{
-			message = (byte) this.input.readObject();
-		} /* end try */
-		catch(IOException | ClassNotFoundException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} /* end catch */
-		
+		message = (byte) this.input.readObject();
 		return(message);
 	} /* end getSocketMessage method */
 

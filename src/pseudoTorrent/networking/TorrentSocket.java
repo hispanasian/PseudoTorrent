@@ -1,5 +1,6 @@
 package pseudoTorrent.networking;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -22,9 +23,8 @@ public class TorrentSocket extends ThreadedSocket
 	/******************* Class Attributes *******************/
 	private final PseudoTorrent torrent;
 	
-	/******************* Class Methods 
-	 * @throws SocketException *******************/
-	public TorrentSocket(PseudoTorrent torrent, final Socket socket) throws SocketException
+	/******************* Class Methods *******************/
+	public TorrentSocket(PseudoTorrent torrent, final Socket socket) throws SocketException, IOException
 	{
 		super(socket);
 		this.torrent = torrent;
@@ -34,9 +34,12 @@ public class TorrentSocket extends ThreadedSocket
 	@Override
 	public void run() 
 	{
-		// TODO Auto-generated method stub
 		
-		this.closeStreams();
+		try 
+		{
+			this.closeStreams();
+		} /* end try */
+		catch (IOException e) {/* Do nothing */} 
 	} /* end run method */
 	
 } /* end TorrentSocket class */

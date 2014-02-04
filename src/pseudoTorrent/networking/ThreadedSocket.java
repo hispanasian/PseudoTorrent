@@ -12,14 +12,12 @@ import java.net.Socket;
 public abstract class ThreadedSocket extends BasicSocket
 {
 	/******************* Class Attributes *******************/
-	protected final Object lock;
 	protected final Thread thread;
 	
 	/******************* Class Methods *******************/
 	public ThreadedSocket(Socket socket) 
 	{
 		super(socket);
-		this.lock = this;
 		this.thread = new Thread(this);
 	} /* end Constructor */
 	
@@ -29,7 +27,7 @@ public abstract class ThreadedSocket extends BasicSocket
 	 */
 	public synchronized final Object getLock()
 	{
-		return this.lock;
+		return this;
 	} /* end getLock method */
 	
 	/**

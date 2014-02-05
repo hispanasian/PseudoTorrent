@@ -1,4 +1,4 @@
-package pseudoTorrent.networking;
+package networking;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -12,6 +12,9 @@ import java.net.Socket;
  */
 public abstract class ThreadedSocket extends BasicSocket
 {
+	/******************* Class Constants *******************/
+	public final Object LOCK;	/* The lock to be used to stay thread-safe */
+	
 	/******************* Class Attributes *******************/
 	protected final Thread thread;
 	
@@ -19,17 +22,9 @@ public abstract class ThreadedSocket extends BasicSocket
 	public ThreadedSocket(Socket socket) throws IOException 
 	{
 		super(socket);
+		this.LOCK = this;
 		this.thread = new Thread(this);
 	} /* end Constructor */
-	
-	/**
-	 * Returns the lock used by this object to maintain synchronicity
-	 * @return	the lock used by this object to maintain synchronicity
-	 */
-	public synchronized final Object getLock()
-	{
-		return this;
-	} /* end getLock method */
 	
 	/**
 	 * Starts this object in a thread.
@@ -40,19 +35,19 @@ public abstract class ThreadedSocket extends BasicSocket
 	} /* end start method */
 	
 	/**
-	 * A thread-safe way to get a message through the socket
+	 * A thread-safe way to get a packet through the socket
 	 */
-	protected synchronized final Serializable getSocketMessage() throws ClassNotFoundException, IOException
+	protected synchronized final Serializable getPacket() throws ClassNotFoundException, IOException
 	{
-		return super.getSocketMessage();
+		return super.getPacket();
 	} /* end getSocketMessage method */
 	
 	/**
-	 * A thread-safe way to send a message through the socket
+	 * A thread-safe way to send a packet through the socket
 	 */
-	protected synchronized final void sendSocketMessage(Serializable message) throws IOException
+	protected synchronized final void sendPacket(Serializable message) throws IOException
 	{
-		super.sendSocketMessage(message);
+		super.sendPacket(message);
 	} /* end sendSocketMessage method */
 	
 } /* end ThreadedSocket class */

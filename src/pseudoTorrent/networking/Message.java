@@ -1,4 +1,4 @@
-package pseudoTorrent.messages;
+package pseudoTorrent.networking;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -53,7 +53,6 @@ public abstract class Message
 	 * Constructs a message with the given type and payload. Note that the only
 	 * messages that provide an int type payload are:
 	 * HAVE
-	 * BITFIELD
 	 * REQUEST
 	 * PIECE
 	 * According to the specification, these payloads will always be 4 bytes. 
@@ -75,6 +74,13 @@ public abstract class Message
 		this.type = type;
 		this.payload = payload;
 	} /* end Constructor */
+	
+	protected Message(Type type, boolean[] payload)
+	{
+		this.length = payload
+		this.type = type;
+		
+	}
 	
 	protected Message(Type type)
 	{

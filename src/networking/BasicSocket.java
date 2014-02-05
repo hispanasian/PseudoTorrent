@@ -1,4 +1,4 @@
-package pseudoTorrent.networking;
+package networking;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -47,14 +47,25 @@ public abstract class BasicSocket implements Runnable
 		
 	} /* end closeServerSocket method */
 	
-	protected void sendSocketMessage(Serializable message) throws IOException
+	/**
+	 * Sends a Serialized object over the socket
+	 * @param message	the Serialized object to be sent
+	 * @throws IOException
+	 */
+	protected void sendPacket(Serializable message) throws IOException
 	{// TODO Change to correct input
 		this.output.writeObject(message);
 		this.output.flush();
 
 	} /* end sendSocketMessage method */
 	
-	protected Serializable getSocketMessage() throws ClassNotFoundException, IOException
+	/**
+	 * Gets a Serialized object from the socket
+	 * @return		the Serialized object from the socket
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
+	protected Serializable getPacket() throws ClassNotFoundException, IOException
 	{// TODO Change to correct return
 		Serializable message = null;
 		message = (byte) this.input.readObject();

@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 
+import pseudoTorrent.PseudoTorrent;
+
 import networking.ThreadedSocket;
 
-import pseudoTorrent.PseudoTorrent;
+
+
 
 /**
  * The TorrentSocket class will perform the socket functionality necessary for

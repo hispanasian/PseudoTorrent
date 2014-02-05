@@ -1,5 +1,6 @@
 package networking;
 
+
 public abstract class Protocol 
 {
 	/******************* Class Attributes *******************/

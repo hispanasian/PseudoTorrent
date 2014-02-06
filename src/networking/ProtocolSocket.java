@@ -16,7 +16,7 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	public static final int TIMEOUT = 1000;
 	
 	/******************* Class Attributes *******************/
-	protected final ProtocolPackage protocols;
+	protected ProtocolPackage protocols;
 	protected volatile boolean done;
 	
 	/******************* Class Abstracts *******************/
@@ -63,6 +63,16 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	public ProtocolSocket(Socket socket, ProtocolPackage protocols) throws IOException 
 	{
 		this(socket, protocols, ProtocolSocket.TIMEOUT);
+	} /* end Constructor */
+	
+	public ProtocolSocket(Socket socket) throws IOException
+	{
+		this(socket, null, ProtocolSocket.TIMEOUT);
+	} /* end Constructor */
+	
+	public ProtocolSocket(Socket socket, int timeout) throws IOException
+	{
+		this(socket, null, timeout);
 	} /* end Constructor */
 	
 	@Override
@@ -138,5 +148,14 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	{
 		this.done = true;
 	} /* end terminate method */
+	
+	/**
+	 * Sets the ProtocolPackage to be used by this ProtocolSocket
+	 * @param protocols	the ProtocolPackage to be used by this ProtocolSocket
+	 */
+	public void setProtocolPackage(ProtocolPackage protocols)
+	{
+		this.protocols = protocols;
+	} /* end setProtocolPackage */
 
 } /* end ProtocolSocket class */

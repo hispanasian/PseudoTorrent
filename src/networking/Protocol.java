@@ -1,23 +1,15 @@
 package networking;
 
 
-public abstract class Protocol 
+public interface Protocol 
 {
-	/******************* Class Attributes *******************/
-	protected final ProtocolPackage protocols;
-	
 	/******************* Class Abstracts *******************/
 	/**
 	 * Processes the message and performs the expected function as defined by
 	 * the user.
-	 * @param message
+	 * @param protocols	the ProtocolPackage that called this method
+	 * @param message	the message that is to be processed
 	 */
-	protected abstract void process(ProtocolMessage message);
-	
-	/******************* Class Methods *******************/
-	public Protocol(ProtocolPackage protocols)
-	{
-		this.protocols = protocols;
-	} /* end constructor */
+	public void process(ProtocolPackage protocols, ProtocolMessage message);
 	
 } /* end Protocol class */

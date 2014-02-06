@@ -255,7 +255,7 @@ public abstract class Message implements ProtocolMessage
 	} /* end determineType method */
 	
 	@Override
-	public final int getID()
+	public final int getProtocolID()
 	{
 		return this.type.val;
 	} /* end getID method */

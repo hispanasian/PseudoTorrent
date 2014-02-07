@@ -12,6 +12,11 @@ public class Tuple
 	public final int type;
 	
 	/******************* Class Constants *******************/
+	/**
+	 * Creates a tuple with the given index and type
+	 * @param index	the index of the tuple
+	 * @param type	the type of the tuple
+	 */
 	public Tuple(int index, int type)
 	{
 		this.index = index;
@@ -19,4 +24,4 @@ public class Tuple
 		
 	} /* end Constructor */
 	
-} /* end Triple */
+} /* end Tuple class */

@@ -92,7 +92,18 @@ public abstract class ProtocolSocket extends ThreadedSocket
 			synchronized(this.LOCK)
 			{
 				message = this.getMessage();
-				if(message != null) this.protocols.process(message);
+				if(message != null)
+				{
+					try 
+					{
+						this.protocols.process(message);
+					} /* end try */
+					catch (InstantiationException | IllegalAccessException e) 
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} /* end catch */
+				} /* end if */
 			} /* end synchronized block */
 			
 		} /* end loop */

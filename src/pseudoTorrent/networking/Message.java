@@ -23,7 +23,7 @@ import networking.ProtocolMessage;
  * @author Carlos Vasquez
  *
  */
-public abstract class Message implements ProtocolMessage
+public class Message implements ProtocolMessage
 {
 	/******************* Class Constants *******************/
 	private static final long serialVersionUID = 1L;
@@ -129,7 +129,11 @@ public abstract class Message implements ProtocolMessage
 		this.payload = null;
 	} /* end Constructor */
 	
-	public Message(byte[] message)
+	/**
+	 * Constructs a message based on a deconstruction of the byte array.
+	 * @param message	the byte array
+	 */
+	public Message(Byte[] message)
 	{
 		this.length = message.length - 4;
 		this.type = this.determineType(message[4]);
@@ -149,7 +153,7 @@ public abstract class Message implements ProtocolMessage
 	 * Returns a byte array representation of the message according to spec.
 	 * @return	a byte array representation of the message.
 	 */
-	public byte[] toByte()
+	public byte[] toBytes()
 	{
 		/* message length is the length plus 4 to take into account the length
 		 * field size */

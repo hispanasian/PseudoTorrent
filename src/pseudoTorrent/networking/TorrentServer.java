@@ -37,7 +37,7 @@ public class TorrentServer implements Runnable
 			{
 				Socket socket = null;
 				socket = server.accept();
-				if(socket != null) new TorrentSocket(torrent, socket).start();
+				if(socket != null) new TorrentSocket(torrent, socket, true).start();
 			} /* end try */
 			catch (Exception e) 
 			{

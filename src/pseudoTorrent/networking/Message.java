@@ -3,7 +3,6 @@ package pseudoTorrent.networking;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.BitSet;
-
 import networking.ProtocolMessage;
 
 /** TODO: Test this class
@@ -133,21 +132,31 @@ public class Message implements ProtocolMessage
 	 * Constructs a message based on a deconstruction of the byte array.
 	 * @param message	the byte array
 	 */
-	public Message(Byte[] message)
+	public Message(byte[] message)
 	{
 		this.length = message.length - 4;
 		this.type = this.determineType(message[4]);
 		
-		byte[] payload = new byte[this.length - 1];
+		byte[] payload = null;
+		if(this.length > 1) payload = new byte[this.length - 1];
 		
-		for(int i = 0; i < (payload.length - 1); i++)
+		for(int i = 0; i < (this.length - 1); i++)
 		{
-			payload[i] = message[i+4];
+			payload[i] = message[i+5];
 		} /* end for loop */
 		
 		this.payload = payload;
 		
-	} /* end overloaded constructor */
+	} /* end Constructor */
+	
+	/**
+	 * Constructs a message based on a deconstruction of the Byte array.
+	 * @param message	the Byte array
+	 */
+	public Message(Byte[] message)
+	{
+		this(Message.BytesTobytes(message));
+	} /* end Constructor */
 	
 	/**
 	 * Returns a byte array representation of the message according to spec.
@@ -168,7 +177,7 @@ public class Message implements ProtocolMessage
 		
 		for(int i = 0; i < (this.length - 1); i++)
 		{
-			message[i+4] = this.payload[i];
+			message[i+5] = this.payload[i];
 		} /* end for loop */
 		return message;
 	} /* end toByte method */
@@ -177,7 +186,6 @@ public class Message implements ProtocolMessage
 	 * Returns a 4 byte array of bytes that represent val in big endian byte
 	 * order where 0 is the most significant byte and 3 is the least significant
 	 * byte.
-	 * TODO: Verify which is the most significant byte
 	 * @param val	the value to be converted to a 4 byte array
 	 * @return the byte array of val in big endian order
 	 */
@@ -226,6 +234,15 @@ public class Message implements ProtocolMessage
 	} /* end payloadToBitSet */
 	
 	/**
+	 * Returns the length
+	 * @return	the length
+	 */
+	public int getLength()
+	{
+		return this.length;
+	} /* end getLength method */
+	
+	/**
 	 * Returns the Type with the given val
 	 * @param val	the val of the type
 	 * @return		the Type with the given val
@@ -259,9 +276,26 @@ public class Message implements ProtocolMessage
 	} /* end determineType method */
 	
 	@Override
-	public final int getProtocolID()
+	public final Integer getProtocolID()
 	{
 		return this.type.val;
 	} /* end getID method */
+	
+	/**
+	 * Returns a byte array of the given Byte array
+	 * @param bytes	the Byte array
+	 * @return		a byte array of the given Byte array
+	 */
+	protected static byte[] BytesTobytes(Byte[] bytes)
+	{
+		byte[] returner = new byte[bytes.length];
+		
+		for(int i = 0; i < bytes.length; i++)
+		{
+			returner[i] = bytes[i];
+		} /* end for loop */
+		
+		return returner;
+	} /* end Bytestobytes method */
 	
 } /* end Message class */

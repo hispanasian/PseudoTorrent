@@ -14,5 +14,5 @@ public interface ProtocolMessage extends Serializable
 	 * Protocol being queried. Each Protocol ID should be unique.
 	 * @return	the ID of the Protocol to be called
 	 */
-	public int getProtocolID();
+	public Integer getProtocolID();
 } /* end ProtocolMessage */

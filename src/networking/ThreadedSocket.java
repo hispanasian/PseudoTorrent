@@ -10,7 +10,7 @@ import java.net.Socket;
  * @author Carlos Vasquez
  *
  */
-public abstract class ThreadedSocket extends BasicSocket
+public abstract class ThreadedSocket extends BasicSocket implements Runnable
 {
 	/******************* Class Constants *******************/
 	public final Object LOCK;	/* The lock to be used to stay thread-safe */

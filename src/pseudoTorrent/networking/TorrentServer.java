@@ -20,8 +20,7 @@ public class TorrentServer implements Runnable
 	private final PseudoTorrent torrent;
 	private final ServerSocket server;
 	
-	/******************* Class Methods 
-	 * @throws IOException *******************/
+	/******************* Class Methods *******************/
 	public TorrentServer(final PseudoTorrent torrent, int port) throws IOException
 	{
 		this.torrent = torrent;

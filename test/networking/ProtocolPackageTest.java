@@ -61,10 +61,14 @@ public class ProtocolPackageTest
 		test.addProtocol(new TestProtocol(), 5);
 		try {
 			test.process(new TestMessage(5));
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException e) 
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
+		}	catch (IllegalAccessException e)
+		{
+			
+		}
 	}
 	
 	/**
@@ -79,7 +83,10 @@ public class ProtocolPackageTest
 		
 		try {
 			test.process(new TestMessage(6));
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch(IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

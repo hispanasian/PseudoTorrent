@@ -87,7 +87,12 @@ public class TorrentSocket extends ProtocolSocket
 			message = new Message(mssg);
 			
 		} /* end try */
-		catch (ClassNotFoundException | IOException e) 
+		catch (ClassNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} /* end catch */
+		catch(IOException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();

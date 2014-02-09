@@ -98,7 +98,12 @@ public abstract class ProtocolSocket extends ThreadedSocket
 					{
 						this.protocols.process(message);
 					} /* end try */
-					catch (InstantiationException | IllegalAccessException e) 
+					catch (InstantiationException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} /* end catch */
+					catch( IllegalAccessException e)
 					{
 						// TODO Auto-generated catch block
 						e.printStackTrace();

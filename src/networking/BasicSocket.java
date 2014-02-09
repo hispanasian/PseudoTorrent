@@ -68,7 +68,7 @@ public abstract class BasicSocket implements Runnable
 	protected Serializable getPacket() throws ClassNotFoundException, IOException
 	{// TODO Change to correct return
 		Serializable message = null;
-		message = (byte) this.input.readObject();
+		message = (Byte) this.input.readObject();
 		return(message);
 	} /* end getSocketMessage method */
 

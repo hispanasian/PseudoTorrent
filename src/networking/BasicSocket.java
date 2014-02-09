@@ -53,7 +53,7 @@ public abstract class BasicSocket implements Runnable
 	 * @throws IOException
 	 */
 	protected void sendPacket(Serializable message) throws IOException
-	{// TODO Change to correct input
+	{
 		this.output.writeObject(message);
 		this.output.flush();
 
@@ -66,7 +66,7 @@ public abstract class BasicSocket implements Runnable
 	 * @throws IOException
 	 */
 	protected Serializable getPacket() throws ClassNotFoundException, IOException
-	{// TODO Change to correct return
+	{
 		Serializable message = null;
 		message = (Byte) this.input.readObject();
 		return(message);

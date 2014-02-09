@@ -38,10 +38,11 @@ public class TorrentSocket extends ProtocolSocket
 	} /* end constructor */
 
 	@Override
-	public void initialProcess() {
+	public void initialProcess() 
+	{
 		// TODO Implement handshake here
 		
-	}
+	} /* end initialProcess */
 
 	@Override
 	public void endProcess() 

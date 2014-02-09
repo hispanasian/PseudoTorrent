@@ -19,9 +19,4 @@ import pseudoTorrent.networking.PseudoTorrentNetworkingTest;
 @SuiteClasses({PseudoTorrentNetworkingTest.class, PeerProcessTest.class})
 public class pseudoTorrentTest {
 
-	@Test
-	public void test() {
-		fail("Not yet implemented");
-	}
-
 }

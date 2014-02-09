@@ -17,9 +17,4 @@ import org.junit.runners.Suite.SuiteClasses;
 public class NetworkingTest 
 {
 
-	@Test
-	public void test() {
-		fail("Not yet implemented");
-	}
-
 }

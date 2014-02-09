@@ -3,7 +3,18 @@ package networking;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-
+/**
+ * Provides the ability to add protocols (statically or non statically) to the
+ * object and utilize the protocols that were added through the process method.
+ * Each protocol must be given a unique integer value that is unique regardless
+ * of being static or non static. The process method will be called by 
+ * providing providing the message to be processed which will implement the
+ * ProtocolMessage and provide the unique ID. The class also supports lazy 
+ * loading. One must simply pass in the class of the object that should be
+ * loaded.
+ * @author Carlos Vasquez
+ *
+ */
 public abstract class ProtocolPackage 
 {
 	/******************* Class Constants *******************/
@@ -17,6 +28,7 @@ public abstract class ProtocolPackage
 	protected Hashtable<Integer, Tuple> lookup;
 	protected ArrayList<Triple> protocols;
 	protected static ArrayList<Triple> staticProtocols = new ArrayList<Triple>();
+	protected static ArrayList<ProtocolPackage> packages = new ArrayList<ProtocolPackage>();
 	
 	/******************* Class Methods *******************/
 	/**
@@ -30,7 +42,20 @@ public abstract class ProtocolPackage
 		this.protocols = new ArrayList<Triple>();
 		this.protocolList[ProtocolPackage.STATIC] = staticProtocols;
 		this.protocolList[ProtocolPackage.NON_STATIC] = protocols;
-		this.lookup = new Hashtable<Integer, Tuple>(minNumOfProtocols);
+		
+		/* Map the static protocols */
+		synchronized(ProtocolPackage.class)
+		{
+			this.lookup = new Hashtable<Integer, Tuple>(minNumOfProtocols);
+			ProtocolPackage.packages.add(this);
+			Triple triple = null;
+			for(int i = 0; i < staticProtocols.size(); i++)
+			{
+				triple = ProtocolPackage.staticProtocols.get(i);
+				this.lookup.put(triple.id, new Tuple(i, ProtocolPackage.STATIC));
+			} /* end for loop */
+			
+		} /* end synchronized block */
 		
 	} /* end Constructor */
 	
@@ -51,6 +76,15 @@ public abstract class ProtocolPackage
 	{
 		this(null, ProtocolPackage.MAP_SIZE);
 	} /* end Constructor */
+	
+	/**
+	 * Returns the ProtocolSocket that owns this object.
+	 * @return	the ProtocolSocket that owns this object
+	 */
+	public ProtocolSocket getSocket()
+	{
+		return this.socket;
+	} /* end getSocket method */
 	
 	/**
 	 * Although this class contain a constructor, it is up to the user to 
@@ -79,22 +113,17 @@ public abstract class ProtocolPackage
 		if(protocol == null)
 		{
 			protocol = triple.protocolClass.newInstance();
-			this.protocolList[tuple.type].set(tuple.index, new Triple(triple.id, protocol, triple.protocolClass));
+			synchronized(this)
+			{
+				this.protocolList[tuple.type].set(tuple.index, new Triple(triple.id, protocol, triple.protocolClass));
+			} /* end synchronized */
+			
 		} /* end if */
 		
 		/* Process the message */
 		protocol.process(this, message);
 		
 	} /* end process method */
-	
-	/**
-	 * Returns the ProtocolSocket that owns this object.
-	 * @return	the ProtocolSocket that owns this object
-	 */
-	public ProtocolSocket getSocket()
-	{
-		return this.socket;
-	} /* end getSocket method */
 	
 	/**
 	 * Adds a Protocol to the ProtocolPackage
@@ -109,7 +138,11 @@ public abstract class ProtocolPackage
 		
 		/* Add to lookup */
 		Tuple tuple = new Tuple(this.protocols.indexOf(triple), ProtocolPackage.NON_STATIC);
-		this.lookup.put(protocolID, tuple);
+		synchronized(this)
+		{
+			this.lookup.put(protocolID, tuple);
+		} /* end synchronized block */
+		
 		
 	} /* end addProtocol method */
 	
@@ -126,7 +159,10 @@ public abstract class ProtocolPackage
 		
 		/* Add to lookup */
 		Tuple tuple = new Tuple(this.protocols.indexOf(triple), ProtocolPackage.NON_STATIC);
-		this.lookup.put(protocolID, tuple);
+		synchronized(this)
+		{
+			this.lookup.put(protocolID, tuple);
+		} /* end synchronized block */
 		
 	} /* end lazyAddProtocol method */
 	
@@ -137,7 +173,24 @@ public abstract class ProtocolPackage
 	 */
 	public static void addStaticProtocol(Protocol protocol, int protocolID)
 	{
-		ProtocolPackage.staticProtocols.add(new Triple(protocolID, protocol, protocol.getClass()));
+		/* Updates the lookup table for every ProtocolPackage object */
+		synchronized(ProtocolPackage.class)
+		{
+			Triple triple = new Triple(protocolID, protocol, protocol.getClass());
+			ProtocolPackage.staticProtocols.add(triple);
+			Tuple tuple = new Tuple(ProtocolPackage.staticProtocols.indexOf(triple), ProtocolPackage.STATIC);
+			
+			for(ProtocolPackage pack : packages)
+			{
+				synchronized(pack)
+				{
+					pack.lookup.put(protocolID, tuple);
+				} /* end synchronized */
+				
+			} /* end for loop */
+			
+		} /* end synchronized block */
+		
 	} /* end addStaticProtocol method */
 	
 	/**
@@ -148,36 +201,23 @@ public abstract class ProtocolPackage
 	 */
 	public static void lazyAddStaticProtocol(Class<? extends Protocol> protocolClass, int protocolID)
 	{
-		ProtocolPackage.staticProtocols.add(new Triple(protocolID, null, protocolClass));
+		/* Updates the lookup table for every ProtocolPackage object */
+		synchronized(ProtocolPackage.class)
+		{
+			Triple triple = new Triple(protocolID, null, protocolClass);
+			ProtocolPackage.staticProtocols.add(triple);
+			Tuple tuple = new Tuple(ProtocolPackage.staticProtocols.indexOf(triple), ProtocolPackage.STATIC);
+			
+			for(ProtocolPackage pack : packages)
+			{
+				synchronized(pack)
+				{
+					pack.lookup.put(protocolID, tuple);
+				} /* end synchronized */
+				
+			} /* end for loop */
+			
+		} /* end synchronized block */
 	} /* end lazyAddStaticProtocol method */
-	
-	/**
-	 * Creates the lookup table that will be used to quickly find the Protocols. 
-	 * Note that while all local Protocols are added automatically to the
-	 * lookup table, Static Protocols are not. Hence, this method should be 
-	 * called before the process() method is called whenever a static variable
-	 * is added.
-	 */
-	public void makeMap()
-	{
-		int count = protocols.size();
-		count += ProtocolPackage.staticProtocols.size();
-		this.lookup = new Hashtable<Integer, Tuple>(count);
-		
-		Triple triple;
-		
-		for(int i = 0; i < this.protocols.size(); i++)
-		{
-			triple = this.protocols.get(i);
-			this.lookup.put(triple.id, new Tuple(triple.id, ProtocolPackage.NON_STATIC));
-		} /* end for loop */
-		
-		for(int i = 0; i < ProtocolPackage.staticProtocols.size(); i++)
-		{
-			triple = ProtocolPackage.staticProtocols.get(i);
-			this.lookup.put(triple.id, new Tuple(triple.id, ProtocolPackage.NON_STATIC));
-		} /* end for loop */
-		
-	} /* end makeMap method */
 	
 } /* end ProtocolPackage class */

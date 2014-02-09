@@ -2,15 +2,10 @@ package networking;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
-
 import networking.BasicSocketTest.TestSocket;
 
-import pseudoTorrent.PseudoTorrent;
-import pseudoTorrent.networking.TorrentSocket;
-
 /**
- * Basic Server that helps implement socket based tests
+ * Basic Server that helps implement socket based tests(Used in BasicSocketTest)
  * @author Carlos Vasquez
  *
  */

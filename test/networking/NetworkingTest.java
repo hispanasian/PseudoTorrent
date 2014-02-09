@@ -1,8 +1,5 @@
 package networking;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -13,7 +10,7 @@ import org.junit.runners.Suite.SuiteClasses;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({BasicSocketTest.class})
+@SuiteClasses({BasicSocketTest.class, ThreadedSocketTest.class})
 public class NetworkingTest 
 {
 

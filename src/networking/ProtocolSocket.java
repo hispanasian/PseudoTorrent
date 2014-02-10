@@ -61,7 +61,7 @@ public abstract class ProtocolSocket extends ThreadedSocket
 		this.protocols = protocols;
 		this.protocols.setSocket(this);
 		this.done = false;
-		this.messagesToSend.set(0);
+		this.messagesToSend = new AtomicInteger(0);
 		this.messagesReceived = 0;
 	} /* end Constructor */
 	

@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 /**
  * The BasicSocket class will be used to provide some basic functionality that
@@ -66,7 +67,7 @@ public abstract class BasicSocket
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 */
-	protected Serializable getPacket() throws ClassNotFoundException, IOException
+	protected Serializable getPacket() throws ClassNotFoundException, IOException, SocketTimeoutException
 	{
 		Object message = null;
 		message = this.input.readObject();

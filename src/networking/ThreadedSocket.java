@@ -3,6 +3,7 @@ package networking;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 /**
  * ThreadedSocket provides the necessary functionality to use and maintain a
@@ -37,7 +38,7 @@ public abstract class ThreadedSocket extends BasicSocket implements Runnable
 	/**
 	 * A thread-safe way to get a packet through the socket
 	 */
-	protected synchronized final Serializable getPacket() throws ClassNotFoundException, IOException
+	protected synchronized final Serializable getPacket() throws ClassNotFoundException, IOException, SocketTimeoutException
 	{
 		return super.getPacket();
 	} /* end getSocketMessage method */

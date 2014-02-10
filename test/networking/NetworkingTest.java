@@ -10,7 +10,7 @@ import org.junit.runners.Suite.SuiteClasses;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({BasicSocketTest.class, ThreadedSocketTest.class})
+@SuiteClasses({BasicSocketTest.class, ThreadedSocketTest.class, ProtocolSocketTest.class})
 public class NetworkingTest 
 {
 

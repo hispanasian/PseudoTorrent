@@ -14,13 +14,8 @@ import networking.ProtocolSocket;
 /**
  * The TorrentSocket class will perform the socket functionality necessary for
  * the PseudoTorrent program. It will be used to send messages and receive and 
-<<<<<<< HEAD
- * interpret messages by performing the necessary protocol as defined by
- * the Protocol class. 
-=======
  * interpret messages by performing the necessary protocol as defined by the 
  * Protocols class. 
->>>>>>> 6c41786accbf1030d5f0075cd3a346174b2a93f6
  * 
  * @author Carlos Vasquez
  *

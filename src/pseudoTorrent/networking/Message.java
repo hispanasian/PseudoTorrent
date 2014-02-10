@@ -186,10 +186,6 @@ public class Message implements ProtocolMessage
 	 * Returns a 4 byte array of bytes that represent val in big endian byte
 	 * order where 0 is the most significant byte and 3 is the least significant
 	 * byte.
-<<<<<<< HEAD
-	 * TODO: Verify which is the most significant byte
-=======
->>>>>>> 6c41786accbf1030d5f0075cd3a346174b2a93f6
 	 * @param val	the value to be converted to a 4 byte array
 	 * @return the byte array of val in big endian order
 	 */

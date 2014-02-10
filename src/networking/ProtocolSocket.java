@@ -171,13 +171,8 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	/**
 	 * Sends a user-defined object that is derived from ProtocolMessage in a 
 	 * thread-safe way. The user will define exactly how ProtocolSocket will
-<<<<<<< HEAD
-	 * send this message in the definedSendMessage method.
-	 * with this method.
-=======
 	 * send this message in the definedSendMessage method. This should only be
 	 * used by non Protocol objects
->>>>>>> 6c41786accbf1030d5f0075cd3a346174b2a93f6
 	 * @param message	the message to be sent over the socket
 	 */
 	public final void sendMessage(ProtocolMessage message)

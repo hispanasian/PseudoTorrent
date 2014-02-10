@@ -10,17 +10,21 @@ import networking.ProtocolPackage;
  * @author Carlos Vasquez
  *
  */
-public class BitfieldProtocol implements Protocol
+public class BitfieldProtocol extends Protocol
 {
 	/******************* Class Methods *******************/
-	/**
-	 * TODO: Describe protocol
-	 */
 	@Override
-	public void process(ProtocolPackage protocols, ProtocolMessage message) 
+	public void sendProtocol(ProtocolPackage protocols) 
 	{
-		// TODO: Implement protocol
+		// TODO Auto-generated method stub
 		
-	} /* end process method */
+	} /* end sendProtocol method */
+
+	@Override
+	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
+	{
+		// TODO Auto-generated method stub
+		
+	} /* end receiveProtocol method */
 
 } /* end ChokeProtocol class */

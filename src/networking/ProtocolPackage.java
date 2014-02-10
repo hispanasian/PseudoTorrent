@@ -15,7 +15,7 @@ import java.util.Hashtable;
  * @author Carlos Vasquez
  *
  */
-public abstract class ProtocolPackage 
+public class ProtocolPackage 
 {
 	/******************* Class Constants *******************/
 	protected static final int STATIC = 1;
@@ -103,7 +103,7 @@ public abstract class ProtocolPackage
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	protected void process(ProtocolMessage message) throws InstantiationException, IllegalAccessException
+	protected void process(ProtocolMessage message, Protocol.Stance stance) throws InstantiationException, IllegalAccessException
 	{
 		Tuple tuple = lookup.get(message.getProtocolID());
 		Triple triple = this.protocolList[tuple.type].get(tuple.index);
@@ -121,7 +121,7 @@ public abstract class ProtocolPackage
 		} /* end if */
 		
 		/* Process the message */
-		protocol.process(this, message);
+		protocol.process(this, message, stance);
 		
 	} /* end process method */
 	

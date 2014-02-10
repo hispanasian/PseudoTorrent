@@ -23,12 +23,19 @@ public class ProtocolPackageTest
 		}
 	} /* end PackageTest class */
 
-	public class TestProtocol implements Protocol
+	public class TestProtocol extends Protocol
 	{
 		@Override
-		public void process(ProtocolPackage protocols, ProtocolMessage message)
-		{
+		public void sendProtocol(ProtocolPackage protocols) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void receiveProtocol(ProtocolPackage protocols,
+				ProtocolMessage message) {
 			int i = 5/0;
+			
 		}
 	} /* end TestProtocol class */
 	
@@ -60,7 +67,7 @@ public class ProtocolPackageTest
 		PackageTest test = new PackageTest(null, 10);
 		test.addProtocol(new TestProtocol(), 5);
 		try {
-			test.process(new TestMessage(5));
+			test.process(new TestMessage(5), Protocol.Stance.RECEIVING);
 		} catch (InstantiationException e) 
 		{
 			// TODO Auto-generated catch block
@@ -82,7 +89,7 @@ public class ProtocolPackageTest
 		ProtocolPackage.lazyAddStaticProtocol(ChokeProtocol.class, 6);	
 		
 		try {
-			test.process(new TestMessage(6));
+			test.process(new TestMessage(6), Protocol.Stance.RECEIVING);
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

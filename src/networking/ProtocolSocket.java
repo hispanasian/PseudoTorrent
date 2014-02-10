@@ -133,7 +133,7 @@ public abstract class ProtocolSocket extends ThreadedSocket
 				{
 					try 
 					{
-						this.protocols.process(message);
+						this.protocols.process(message, Protocol.Stance.RECEIVING);
 					} /* end try */
 					catch (InstantiationException e)
 					{
@@ -210,7 +210,8 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	 * process method to bypass the lock on sendMessage while there is a message
 	 * being processed. This is because the messagesReceived will still be 
 	 * marked greater than 0 in order to atomize the getMessage and process 
-	 * methods.
+	 * methods. Note, this should only be used by the Protocol object that is
+	 * called by this objects process method
 	 * @param message	the message to be sent
 	 */
 	protected final void protocolSendMessage(ProtocolMessage message)

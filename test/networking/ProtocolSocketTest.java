@@ -1,15 +1,10 @@
 package networking;
 
 import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-
-import networking.ThreadedSocketTest.TestServer;
-import networking.ThreadedSocketTest.TestSocket;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,40 +16,69 @@ import org.junit.Test;
  */
 public class ProtocolSocketTest 
 {
+	public static class TestMessage implements ProtocolMessage
+	{
+		private static final long serialVersionUID = 1L;
+		String message;
+		Integer stuff;
+		int id;
+		
+		public TestMessage(String message, Integer stuff, int id)
+		{
+			this.message = message;
+			this.stuff = stuff;
+			this.id = id;
+			
+		} /* end constructor */
+		
+		@Override
+		public Integer getProtocolID() 
+		{
+			return id;
+		} /* end getProtocolID */
+	} /* end TestMessage class */
+	
 	public static class TestSocket extends ProtocolSocket
 	{
 		ArrayList<String> messages;
+		boolean initial;
+		boolean end;
 		
 		public TestSocket(Socket socket) throws IOException 
 		{
 			super(socket);
 			messages = new ArrayList<String>();
-		}
+			initial = false;
+			end = false;
+		} /* end constructor */
 
 		@Override
-		public void initialProcess() {
-			// TODO Auto-generated method stub
-			
-		}
+		public void initialProcess() {initial = true;}
 
 		@Override
-		public void endProcess() {
-			// TODO Auto-generated method stub
-			
-		}
+		public void endProcess() {end = true;}
 
 		@Override
 		protected ProtocolMessage definedGetMessage() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+			ProtocolMessage message = null;
+			try {
+				message = (ProtocolMessage) this.getPacket();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return message;
+		} /* end definedGetMessage */
 
 		@Override
 		protected void definedSendMessage(ProtocolMessage message) {
-			// TODO Auto-generated method stub
-			
-		}
-		
+			try {
+				this.sendPacket(message);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} /* end definedSendMessage */
 	} /* end TestSocket */
 	
 	public static class TestServer implements Runnable
@@ -89,6 +113,42 @@ public class ProtocolSocketTest
 			thread.start();
 		}
 	} /* end TestServer */
+	
+	public static class R1 extends Protocol
+	{
+
+		@Override
+		public void sendProtocol(ProtocolPackage protocols) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void receiveProtocol(ProtocolPackage protocols,
+				ProtocolMessage message) {
+			ProtocolSocket socket = protocols.socket;
+			TestMessage m = (TestMessage) message;
+			int i;
+			if(m.stuff != 1) i = 1/0;
+			
+		}
+	} /* end R1 */
+	public static class S1 extends Protocol
+	{
+
+		@Override
+		public void sendProtocol(ProtocolPackage protocols) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void receiveProtocol(ProtocolPackage protocols,
+				ProtocolMessage message) {
+			// TODO Auto-generated method stub
+			
+		} /* end receiveProtocol method */
+	} /* end  */
 	
 	public TestServer server;
 	public TestSocket sender;

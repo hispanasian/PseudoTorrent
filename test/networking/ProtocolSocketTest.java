@@ -1,23 +1,27 @@
 package networking;
 
 import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+
+import networking.ThreadedSocketTest.TestServer;
+import networking.ThreadedSocketTest.TestSocket;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests the functionality of the ThreadedSocket. Note that this test does not
- * test the thread-safeness of the class. 
+ * Tests the ProtocolSocket class. This test does not test thread-safety
  * @author Carlos Vasquez
  *
  */
-public class ThreadedSocketTest 
+public class ProtocolSocketTest 
 {
-	public static class TestSocket extends ThreadedSocket
+	public static class TestSocket extends ProtocolSocket
 	{
 		ArrayList<String> messages;
 		
@@ -28,31 +32,29 @@ public class ThreadedSocketTest
 		}
 
 		@Override
-		public void run() 
-		{
-			try {
-				this.sendPacket("message1");
-				this.sendPacket("message2");
-				this.sendPacket("message3");
-				this.messages.add((String) this.getPacket());
-				this.messages.add((String) this.getPacket());
-				this.messages.add((String) this.getPacket());
-				this.sendPacket("Stupid tests");
-				this.sendPacket("they take forever");
-				this.sendPacket("so boring");
-				this.messages.add((String) this.getPacket());
-				this.messages.add((String) this.getPacket());
-				this.messages.add((String) this.getPacket());
-				this.sendPacket("but so necessarry");
-				this.sendPacket("well, not necessarry");
-				this.sendPacket("if you use proofs");
-				this.messages.add((String) this.getPacket());
-				this.messages.add((String) this.getPacket());
-				this.messages.add((String) this.getPacket());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		public void initialProcess() {
+			// TODO Auto-generated method stub
+			
 		}
+
+		@Override
+		public void endProcess() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		protected ProtocolMessage definedGetMessage() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		protected void definedSendMessage(ProtocolMessage message) {
+			// TODO Auto-generated method stub
+			
+		}
+		
 	} /* end TestSocket */
 	
 	public static class TestServer implements Runnable
@@ -76,7 +78,6 @@ public class ThreadedSocketTest
 			} /* end try */
 			catch (Exception e) 
 			{
-				// TODO Decide what to do for exception
 				e.printStackTrace();
 			} /* end catch */
 			
@@ -97,7 +98,7 @@ public class ThreadedSocketTest
 	@Before
 	public void before()
 	{
-		port = 6010;
+		port = 6020;
 		try
 		{
 			this.server = new TestServer(port);
@@ -126,29 +127,10 @@ public class ThreadedSocketTest
 			e.printStackTrace();
 		} /* end catch */
 	} /* end after */
-
 	@Test
 	public void test() 
 	{
-		server.socket.start();
-		sender.start();
-		
-		try {
-			server.socket.thread.join();
-			sender.thread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		finally
-		{
-			assertEquals("Server should have 9 messages", 9, server.socket.messages.size());
-			assertEquals("Sender should have 9 messages", 9, sender.messages.size());
-			for(int i = 0; i < sender.messages.size(); i++)
-			{
-				assertEquals("Message " + i + " is " + sender.messages.get(i), sender.messages.get(i), server.socket.messages.get(i));
-			} /* end for loop */
-		} /* end finally */
-		
+		fail("Not yet implemented");
 	} /* end test method */
 
-} /* end TjreadedSpcletTest c;ass */
+} /* end ProtocolSocketTest class */

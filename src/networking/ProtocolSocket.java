@@ -2,6 +2,7 @@ package networking;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -18,6 +19,8 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	/******************* Class Attributes *******************/
 	protected ProtocolPackage protocols;
 	protected volatile boolean done;
+	private int messagesToSend;
+	private int messagesReceived;
 	
 	/******************* Class Abstracts *******************/
 	/**
@@ -58,6 +61,8 @@ public abstract class ProtocolSocket extends ThreadedSocket
 		this.protocols = protocols;
 		this.protocols.setSocket(this);
 		this.done = false;
+		this.messagesToSend = 0;
+		this.messagesReceived = 0;
 	} /* end Constructor */
 	
 	public ProtocolSocket(Socket socket, ProtocolPackage protocols) throws IOException 
@@ -75,6 +80,9 @@ public abstract class ProtocolSocket extends ThreadedSocket
 		this(socket, null, timeout);
 	} /* end Constructor */
 	
+	/**
+	 * After initialProcess, waits to receive a message
+	 */
 	@Override
 	public final void run() 
 	{
@@ -91,6 +99,35 @@ public abstract class ProtocolSocket extends ThreadedSocket
 			message = null;
 			synchronized(this.LOCK)
 			{
+				/* Before receiving a message, make sure there are no messages that
+				 * need to be sent. If there are, wait until all messages are sent.
+				 * This is done because we would like the getMessage and process
+				 * methods to be atomic but getMessage blocks and thus locks out
+				 * the sendMessage method. This potentially wastes much time and 
+				 * has the potential to starve the sendMessage method. However, 
+				 * because a timeout is implemented, we can make sure that all 
+				 * messages are sent within the interval of the timeout. */
+				while(this.messagesToSend > 0)
+				{
+					try 
+					{
+						this.LOCK.wait();
+					} /* end try */
+					catch (InterruptedException e) 
+					{
+						// TODO Determine what to do for exception
+						e.printStackTrace();
+					} /* end catch */
+					
+					/* Prevent senders from sending */
+					this.messagesReceived++;
+				} /* end while loop */
+				
+				/* Now we can atomically get the message and process it so as to
+				 * prevent the following case: we get a message and the sender is
+				 * expecting a specific response. However, another thread comes in 
+				 * and sends a message before or during the process that conflicts
+				 * with what should be sent.  */
 				message = this.getMessage();
 				if(message != null)
 				{
@@ -109,6 +146,11 @@ public abstract class ProtocolSocket extends ThreadedSocket
 						e.printStackTrace();
 					} /* end catch */
 				} /* end if */
+				
+				/* Finally, let the other threads know that they can send a 
+				 * message */
+				this.messagesReceived--;
+				this.LOCK.notifyAll();
 			} /* end synchronized block */
 			
 		} /* end loop */
@@ -129,17 +171,55 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	/**
 	 * Sends a user-defined object that is derived from ProtocolMessage in a 
 	 * thread-safe way. The user will define exactly how ProtocolSocket will
-	 * send this message in the definedSendMessage method.
-	 * with this method.
+	 * send this message in the definedSendMessage method. This should only be
+	 * used by non Protocol objects
 	 * @param message	the message to be sent over the socket
 	 */
 	public final void sendMessage(ProtocolMessage message)
 	{
 		synchronized(this.LOCK)
 		{
+			/* Attempt to send a message only if no message was received */
+			while(this.messagesReceived > 0) 
+			{
+				try 
+				{
+					this.LOCK.wait();
+				} /* end try */
+				catch (InterruptedException e) 
+				{
+					// TODO Determine what to do during exception
+					e.printStackTrace();
+				} /* end catch */
+			} /* end while loop */
+			/* Prevent a receiver from receiving */
+			this.messagesToSend++;
+			
+			/* Send the message */
+			this.definedSendMessage(message);
+			
+			/* Potentially let the receive through */
+			this.messagesToSend--;
+			this.LOCK.notifyAll();
+		} /* end synchronized block */
+		
+	} /* end sendMessage method */
+	
+	/**
+	 * This method is provided explicitly for Protocol objects. This allows the
+	 * process method to bypass the lock on sendMessage while there is a message
+	 * being processed. This is because the messagesReceived will still be 
+	 * marked greater than 0 in order to atomize the getMessage and process 
+	 * methods.
+	 * @param message	the message to be sent
+	 */
+	protected final void protocolSendMessage(ProtocolMessage message)
+	{
+		synchronized(this.LOCK)
+		{
 			this.definedSendMessage(message);
 		} /* end synchronized block */
-	} /* end sendMessage method */
+	} /* end protocolSendMessage method */
 	
 	/**
 	 * Returns a user-defined object that is derived from ProtocolMessage in a

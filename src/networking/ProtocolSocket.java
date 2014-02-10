@@ -19,7 +19,7 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	/******************* Class Attributes *******************/
 	protected ProtocolPackage protocols;
 	protected volatile boolean done;
-	private int messagesToSend;
+	private AtomicInteger messagesToSend;
 	private int messagesReceived;
 	
 	/******************* Class Abstracts *******************/
@@ -61,7 +61,7 @@ public abstract class ProtocolSocket extends ThreadedSocket
 		this.protocols = protocols;
 		this.protocols.setSocket(this);
 		this.done = false;
-		this.messagesToSend = 0;
+		this.messagesToSend.set(0);
 		this.messagesReceived = 0;
 	} /* end Constructor */
 	
@@ -107,7 +107,7 @@ public abstract class ProtocolSocket extends ThreadedSocket
 				 * has the potential to starve the sendMessage method. However, 
 				 * because a timeout is implemented, we can make sure that all 
 				 * messages are sent within the interval of the timeout. */
-				while(this.messagesToSend > 0)
+				while(this.messagesToSend.get() > 0)
 				{
 					try 
 					{
@@ -177,6 +177,8 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	 */
 	public final void sendMessage(ProtocolMessage message)
 	{
+		/* Prevent a receiver from receiving */
+		this.messagesToSend.getAndIncrement();
 		synchronized(this.LOCK)
 		{
 			/* Attempt to send a message only if no message was received */
@@ -192,14 +194,12 @@ public abstract class ProtocolSocket extends ThreadedSocket
 					e.printStackTrace();
 				} /* end catch */
 			} /* end while loop */
-			/* Prevent a receiver from receiving */
-			this.messagesToSend++;
 			
 			/* Send the message */
 			this.definedSendMessage(message);
 			
 			/* Potentially let the receive through */
-			this.messagesToSend--;
+			this.messagesToSend.getAndDecrement();
 			this.LOCK.notifyAll();
 		} /* end synchronized block */
 		

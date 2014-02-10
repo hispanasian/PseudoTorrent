@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import networking.ProtocolPackage;
+
 import pseudoTorrent.PseudoTorrent;
 
 
@@ -20,8 +22,7 @@ public class TorrentServer implements Runnable
 	private final PseudoTorrent torrent;
 	private final ServerSocket server;
 	
-	/******************* Class Methods 
-	 * @throws IOException *******************/
+	/******************* Class Methods *******************/
 	public TorrentServer(final PseudoTorrent torrent, int port) throws IOException
 	{
 		this.torrent = torrent;
@@ -31,13 +32,16 @@ public class TorrentServer implements Runnable
 	@Override
 	public void run() 
 	{
+		Socket socket;
+		ProtocolPackage protocols;
 		while(!Thread.interrupted())
 		{
 			try 
 			{
-				Socket socket = null;
+				socket = null;
+				protocols = new ProtocolPackage();
 				socket = server.accept();
-				if(socket != null) new TorrentSocket(torrent, socket).start();
+				if(socket != null) new TorrentSocket(torrent, socket, protocols, true).start();
 			} /* end try */
 			catch (Exception e) 
 			{

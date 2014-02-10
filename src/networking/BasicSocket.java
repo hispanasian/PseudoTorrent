@@ -5,6 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+
 
 /**
  * The BasicSocket class will be used to provide some basic functionality that
@@ -13,7 +15,7 @@ import java.net.Socket;
  * @author Carlos Vasquez
  *
  */
-public abstract class BasicSocket implements Runnable
+public abstract class BasicSocket 
 {
 	/******************* Class Methods *******************/
 	protected final Socket socket;
@@ -34,6 +36,7 @@ public abstract class BasicSocket implements Runnable
 	protected final void createStreams() throws IOException
 	{
 		this.output = new ObjectOutputStream(this.socket.getOutputStream());
+		this.output.flush();
 		this.input = new ObjectInputStream(this.socket.getInputStream());
 	} /* end createStreams method */
 	
@@ -53,7 +56,7 @@ public abstract class BasicSocket implements Runnable
 	 * @throws IOException
 	 */
 	protected void sendPacket(Serializable message) throws IOException
-	{// TODO Change to correct input
+	{
 		this.output.writeObject(message);
 		this.output.flush();
 
@@ -61,15 +64,15 @@ public abstract class BasicSocket implements Runnable
 	
 	/**
 	 * Gets a Serialized object from the socket
-	 * @return		the Serialized object from the socket
+	 * @return	the Serialized object from the socket
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 */
-	protected Serializable getPacket() throws ClassNotFoundException, IOException
-	{// TODO Change to correct return
-		Serializable message = null;
-		message = (byte) this.input.readObject();
-		return(message);
+	protected Serializable getPacket() throws ClassNotFoundException, IOException, SocketTimeoutException
+	{
+		Object message = null;
+		message = this.input.readObject();
+		return (Serializable) (message);
 	} /* end getSocketMessage method */
 
 } /* end TorrentSocket class */

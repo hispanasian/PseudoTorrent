@@ -17,7 +17,7 @@ public abstract class ThreadedSocket extends BasicSocket implements Runnable
 	public final Object LOCK;	/* The lock to be used to stay thread-safe */
 	
 	/******************* Class Attributes *******************/
-	protected final Thread thread;
+	public final Thread thread;
 	
 	/******************* Class Methods *******************/
 	public ThreadedSocket(Socket socket) throws IOException 

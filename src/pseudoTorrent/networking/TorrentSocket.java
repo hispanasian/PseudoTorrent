@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import pseudoTorrent.PseudoTorrent;
 import networking.ProtocolMessage;
+import networking.ProtocolPackage;
 import networking.ProtocolSocket;
 
 
@@ -29,9 +30,9 @@ public class TorrentSocket extends ProtocolSocket
 	public final boolean isSender;
 	
 	/******************* Class Methods *******************/
-	public TorrentSocket(PseudoTorrent torrent, final Socket socket, boolean isSender) throws SocketException, IOException
+	public TorrentSocket(PseudoTorrent torrent, final Socket socket, ProtocolPackage protocols, boolean isSender) throws SocketException, IOException
 	{
-		super(socket);
+		super(socket, protocols);
 		this.torrent = torrent;
 		this.socket.setSoTimeout(TIMEOUT);
 		this.isSender = isSender;

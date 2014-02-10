@@ -11,7 +11,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 
 @RunWith(Suite.class)
-@SuiteClasses({MessageTest.class})
+@SuiteClasses({MessageTest.class, TorrentSocketTest.class})
 public class PseudoTorrentNetworkingTest {
 
 

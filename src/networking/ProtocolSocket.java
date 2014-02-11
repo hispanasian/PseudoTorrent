@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Carlos Vasquez
  *
  */
-public abstract class ProtocolSocket extends ThreadedSocket
+public abstract class ProtocolSocket extends ThreadedSocket implements SocketInterface, ProtocolSocketInterface
 {
 	/******************* Class Constants *******************/
 	public static final int TIMEOUT = 1000;
@@ -215,22 +215,6 @@ public abstract class ProtocolSocket extends ThreadedSocket
 		
 	} /* end sendMessage method */
 	
-	/**
-	 * This method is provided explicitly for Protocol objects. This allows the
-	 * process method to bypass the lock on sendMessage while there is a message
-	 * being processed. This is because the messagesReceived will still be 
-	 * marked greater than 0 in order to atomize the getMessage and process 
-	 * methods. Note, this should only be used by the Protocol object that is
-	 * called by this objects process method. 
-	 * @param message	the message to be sent
-	 */
-	protected final void protocolSendMessage(ProtocolMessage message)
-	{
-		synchronized(this.LOCK)
-		{
-			this.definedSendMessage(message);
-		} /* end synchronized block */
-	} /* end protocolSendMessage method */
 	
 	/**
 	 * Returns a user-defined object that is derived from ProtocolMessage in a
@@ -247,6 +231,33 @@ public abstract class ProtocolSocket extends ThreadedSocket
 			return this.definedGetMessage();
 		} /* end synchronized block */
 	} /* end getMesage method */
+	
+	/**
+	 * This method is provided explicitly for Protocol objects. This allows the
+	 * process method to bypass the lock on sendMessage while there is a message
+	 * being processed. This is because the messagesReceived will still be 
+	 * marked greater than 0 in order to atomize the getMessage and process 
+	 * methods. Note, this should only be used by the Protocol object that is
+	 * called by this objects process method. 
+	 * @param message	the message to be sent
+	 */
+	public final void protocolSendMessage(ProtocolMessage message)
+	{
+		synchronized(this.LOCK)
+		{
+			this.definedSendMessage(message);
+		} /* end synchronized block */
+	} /* end protocolSendMessage method */
+	
+	/**
+	 * This method is provided explicitly for Protocol objects. It simply 
+	 * returns getMessage.
+	 * @return	the ProtocolMessage from getMessage
+	 */
+	public final ProtocolMessage protocolGetMessage()
+	{
+		return this.getMessage();
+	} /* end protocolGetMessage method */
 	
 	/**
 	 * Sets the flag that the thread should terminate.

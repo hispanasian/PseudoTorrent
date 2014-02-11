@@ -141,7 +141,7 @@ public class ProtocolSocketTest {
 				m = new TestMessage(null, 5, 1);
 				protocols.socket.protocolSendMessage(m);
 				System.out.println(Thread.currentThread().getName() + " p1 sent " +m);
-				m = (TestMessage) protocols.socket.getMessage();
+				m = (TestMessage) protocols.socket.protocolGetMessage();
 				if (!hello.equals(m.message)) i = 1 / 0;
 				else System.out.println(Thread.currentThread().getName() + " p1 send terminated correctly");
 			}
@@ -155,7 +155,7 @@ public class ProtocolSocketTest {
 		@Override
 		public void receiveProtocol(ProtocolPackage protocols,
 				ProtocolMessage message) {
-			ProtocolSocket socket = protocols.socket;
+			ProtocolSocketInterface socket = protocols.socket;
 			TestMessage m = (TestMessage) message;
 			System.out.println(Thread.currentThread().getName() + " First P1 message " + m + " " + counter++);
 			int i;
@@ -163,19 +163,19 @@ public class ProtocolSocketTest {
 			{
 				if (m.stuff != 1)
 					i = 1 / 0;
-				m = (TestMessage) protocols.socket.getMessage();
+				m = (TestMessage) protocols.socket.protocolGetMessage();
 				counter++;
 				if (m.stuff != 2)
 					i = 1 / 0;
-				m = (TestMessage) protocols.socket.getMessage();
+				m = (TestMessage) protocols.socket.protocolGetMessage();
 				counter++;
 				if (m.stuff != 3)
 					i = 1 / 0;
-				m = (TestMessage) protocols.socket.getMessage();
+				m = (TestMessage) protocols.socket.protocolGetMessage();
 				counter++;
 				if (m.stuff != 4)
 					i = 1 / 0;
-				m = (TestMessage) protocols.socket.getMessage();
+				m = (TestMessage) protocols.socket.protocolGetMessage();
 				counter++;
 				if (m.stuff != 5)
 					i = 1 / 0;
@@ -206,7 +206,7 @@ public class ProtocolSocketTest {
 		@Override
 		public void receiveProtocol(ProtocolPackage protocols,
 				ProtocolMessage message) {
-			ProtocolSocket socket = protocols.socket;
+			ProtocolSocketInterface socket = protocols.socket;
 			int i;
 			TestMessage m = (TestMessage) message;
 			try
@@ -226,9 +226,9 @@ public class ProtocolSocketTest {
 
 		@Override
 		public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) {
-			ProtocolSocket socket = protocols.socket;
+			ProtocolSocketInterface socket = protocols.socket;
 			int i;
-			TestMessage m = (TestMessage) protocols.socket.getMessage();
+			TestMessage m = (TestMessage) protocols.socket.protocolGetMessage();
 			try {
 				protocols.process(m, Protocol.Stance.RECEIVING);
 			} catch (InstantiationException e) {
@@ -244,7 +244,7 @@ public class ProtocolSocketTest {
 		@Override
 		public void receiveProtocol(ProtocolPackage protocols,
 				ProtocolMessage message) {
-			ProtocolSocket socket = protocols.socket;
+			ProtocolSocketInterface socket = protocols.socket;
 			int i;
 			TestMessage m = (TestMessage) message;
 			try

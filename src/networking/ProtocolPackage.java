@@ -23,7 +23,7 @@ public class ProtocolPackage
 	protected static final int MAP_SIZE = 7;
 	
 	/******************* Class Attributes *******************/
-	protected ProtocolSocket socket;
+	protected ProtocolSocketInterface socket;
 	protected final ArrayList<Triple>[] protocolList;
 	protected Hashtable<Integer, Tuple> lookup;
 	protected ArrayList<Triple> protocols;
@@ -32,10 +32,11 @@ public class ProtocolPackage
 	
 	/******************* Class Methods *******************/
 	/**
-	 * Creates a ProtocolPackage that utilizes the provided ProtocolSocket
-	 * @param socket	the ProtocolSocket used by the object
+	 * Creates a ProtocolPackage that utilizes the provided 
+	 * ProtocolSocketInterface
+	 * @param socket	the ProtocolSocketInterface used by the object
 	 */
-	public ProtocolPackage(ProtocolSocket socket, int minNumOfProtocols)
+	public ProtocolPackage(ProtocolSocketInterface socket, int minNumOfProtocols)
 	{
 		this.socket = socket;
 		this.protocolList = new ArrayList[2];
@@ -64,13 +65,13 @@ public class ProtocolPackage
 		this(null, minNumOfProtocols);
 	} /* end Cosntructor */
 	
-	public ProtocolPackage(ProtocolSocket socket)
+	public ProtocolPackage(ProtocolSocketInterface socket)
 	{
 		this(socket, ProtocolPackage.MAP_SIZE);
 	} /* end Constructor */
 	
 	/**
-	 * Creates a ProtocolPackage with no ProtocolSocket
+	 * Creates a ProtocolPackage with no ProtocolSocketInterface
 	 */
 	public ProtocolPackage()
 	{
@@ -78,10 +79,10 @@ public class ProtocolPackage
 	} /* end Constructor */
 	
 	/**
-	 * Returns the ProtocolSocket that owns this object.
-	 * @return	the ProtocolSocket that owns this object
+	 * Returns the ProtocolSocketInterface that owns this object.
+	 * @return	the ProtocolSocketInterface that owns this object
 	 */
-	public ProtocolSocket getSocket()
+	public ProtocolSocketInterface getSocket()
 	{
 		return this.socket;
 	} /* end getSocket method */
@@ -91,7 +92,7 @@ public class ProtocolPackage
 	 * define the protocols array.
 	 * @param socket	the socket that owns this object
 	 */
-	protected void setSocket(ProtocolSocket socket)
+	protected void setSocket(ProtocolSocketInterface socket)
 	{
 		this.socket = socket;
 	} /* end setSocket method */

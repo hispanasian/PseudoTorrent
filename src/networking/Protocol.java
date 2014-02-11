@@ -25,7 +25,7 @@ public abstract class Protocol
 	{
 		switch(stance)
 		{
-			case SENDING: this.sendProtocol(protocols);
+			case SENDING: this.startSend(protocols, message);
 				break;
 			case RECEIVING: this.receiveProtocol(protocols, message);
 				break;
@@ -40,10 +40,10 @@ public abstract class Protocol
 	 * @param protocols	the ProtocolPackage
 	 * @param message	the message to be sent
 	 */
-	public void startSend(ProtocolPackage protocols, ProtocolMessage message)
+	protected void startSend(ProtocolPackage protocols, ProtocolMessage message)
 	{
-		protocols.socket.definedSendMessage(message);
-		this.sendProtocol(protocols);
+		protocols.socket.protocolSendMessage(message);
+		this.sendProtocol(protocols, message);
 	} /* end startSend method */
 	
 	/**
@@ -67,7 +67,7 @@ public abstract class Protocol
 	 * If the user expects any other behavior, the user can define it here.
 	 * @param protocols	the ProtocolPackage
 	 */
-	public abstract void sendProtocol(ProtocolPackage protocols);
+	public abstract void sendProtocol(ProtocolPackage protocols, ProtocolMessage message);
 	
 	/**
 	 * Defines the protocol that should be followed after the message is sent.

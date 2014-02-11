@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A ThreadedSocket that defines a thread-safe way to deal with protocols as 
- * specified by the ProtocolPackage.  
+ * specified by the ProtocolPackage. This class, by default, starts all sockets
+ * with a timeout of 1000ms.
  * @author Carlos Vasquez
  *
  */
@@ -18,6 +19,7 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	
 	/******************* Class Attributes *******************/
 	protected ProtocolPackage protocols;
+	protected boolean initialized;
 	protected volatile boolean done;
 	private AtomicInteger messagesToSend;
 	private int messagesReceived;
@@ -60,6 +62,7 @@ public abstract class ProtocolSocket extends ThreadedSocket
 		this.socket.setSoTimeout(timeout);
 		this.protocols = protocols;
 		this.protocols.setSocket(this);
+		this.initialized = false;
 		this.done = false;
 		this.messagesToSend = new AtomicInteger(0);
 		this.messagesReceived = 0;
@@ -89,6 +92,8 @@ public abstract class ProtocolSocket extends ThreadedSocket
 		synchronized(this.LOCK)
 		{
 			this.initialProcess();
+			this.initialized = true;
+			this.LOCK.notifyAll();
 		} /* end synchronized block */
 		
 		/* The main body that will deal with incoming messages and process 
@@ -173,16 +178,21 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	 * thread-safe way. The user will define exactly how ProtocolSocket will
 	 * send this message in the definedSendMessage method. This should only be
 	 * used by non Protocol objects
+	 * 
+	 * Note: No messages will be sent until the initialProcess method
+	 * is performed or if the terminate method is called.
 	 * @param message	the message to be sent over the socket
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public final void sendMessage(ProtocolMessage message)
+	public final void sendMessage(ProtocolMessage message) throws InstantiationException, IllegalAccessException
 	{
 		/* Prevent a receiver from receiving */
 		this.messagesToSend.getAndIncrement();
 		synchronized(this.LOCK)
 		{
 			/* Attempt to send a message only if no message was received */
-			while(this.messagesReceived > 0) 
+			while(this.messagesReceived > 0 && !this.done && this.initialized) 
 			{
 				try 
 				{
@@ -196,7 +206,7 @@ public abstract class ProtocolSocket extends ThreadedSocket
 			} /* end while loop */
 			
 			/* Send the message */
-			this.definedSendMessage(message);
+			this.protocols.process(message, Protocol.Stance.SENDING);
 			
 			/* Potentially let the receive through */
 			this.messagesToSend.getAndDecrement();
@@ -211,7 +221,7 @@ public abstract class ProtocolSocket extends ThreadedSocket
 	 * being processed. This is because the messagesReceived will still be 
 	 * marked greater than 0 in order to atomize the getMessage and process 
 	 * methods. Note, this should only be used by the Protocol object that is
-	 * called by this objects process method
+	 * called by this objects process method. 
 	 * @param message	the message to be sent
 	 */
 	protected final void protocolSendMessage(ProtocolMessage message)

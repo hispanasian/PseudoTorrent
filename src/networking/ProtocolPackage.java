@@ -103,7 +103,7 @@ public class ProtocolPackage
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	protected void process(ProtocolMessage message, Protocol.Stance stance) throws InstantiationException, IllegalAccessException
+	protected void process(ProtocolMessage message, Protocol.Stance stance) throws InstantiationException, IllegalAccessException 
 	{
 		Tuple tuple = lookup.get(message.getProtocolID());
 		Triple triple = this.protocolList[tuple.type].get(tuple.index);

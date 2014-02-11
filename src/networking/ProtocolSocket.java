@@ -2,13 +2,15 @@ package networking;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
-
 
 /**
  * A ThreadedSocket that defines a thread-safe way to deal with protocols as 
  * specified by the ProtocolPackage. This class, by default, starts all sockets
- * with a timeout of 1000ms.
+ * with a timeout of 1000ms. The socket handles sent messages byt putting them
+ * in a FIFO queue and processing all the queued messages before blocking to 
+ * wait for a message.
  * @author Carlos Vasquez
  *
  */
@@ -19,10 +21,8 @@ public abstract class ProtocolSocket extends ThreadedSocket implements SocketInt
 	
 	/******************* Class Attributes *******************/
 	protected ProtocolPackage protocols;
-	protected boolean initialized;
 	protected volatile boolean done;
-	private AtomicInteger messagesToSend;
-	private int messagesReceived;
+	private LinkedList<ProtocolMessage> messageQueue;
 	
 	/******************* Class Abstracts *******************/
 	/**
@@ -62,10 +62,8 @@ public abstract class ProtocolSocket extends ThreadedSocket implements SocketInt
 		this.socket.setSoTimeout(timeout);
 		this.protocols = protocols;
 		this.protocols.setSocket(this);
-		this.initialized = false;
 		this.done = false;
-		this.messagesToSend = new AtomicInteger(0);
-		this.messagesReceived = 0;
+		this.messageQueue = new LinkedList<ProtocolMessage>();
 	} /* end Constructor */
 	
 	public ProtocolSocket(Socket socket, ProtocolPackage protocols) throws IOException 
@@ -92,8 +90,6 @@ public abstract class ProtocolSocket extends ThreadedSocket implements SocketInt
 		synchronized(this.LOCK)
 		{
 			this.initialProcess();
-			this.initialized = true;
-			this.LOCK.notifyAll();
 		} /* end synchronized block */
 		
 		/* The main body that will deal with incoming messages and process 
@@ -102,31 +98,11 @@ public abstract class ProtocolSocket extends ThreadedSocket implements SocketInt
 		while(!done)
 		{
 			message = null;
+			
 			synchronized(this.LOCK)
 			{
-				/* Before receiving a message, make sure there are no messages that
-				 * need to be sent. If there are, wait until all messages are sent.
-				 * This is done because we would like the getMessage and process
-				 * methods to be atomic but getMessage blocks and thus locks out
-				 * the sendMessage method. This potentially wastes much time and 
-				 * has the potential to starve the sendMessage method. However, 
-				 * because a timeout is implemented, we can make sure that all 
-				 * messages are sent within the interval of the timeout. */
-				while(this.messagesToSend.get() > 0)
-				{
-					try 
-					{
-						this.LOCK.wait();
-					} /* end try */
-					catch (InterruptedException e) 
-					{
-						// TODO Determine what to do for exception
-						e.printStackTrace();
-					} /* end catch */
-					
-					/* Prevent senders from sending */
-					this.messagesReceived++;
-				} /* end while loop */
+				/* First, process the messages in the messageQueue */
+				this.processQueue();
 				
 				/* Now we can atomically get the message and process it so as to
 				 * prevent the following case: we get a message and the sender is
@@ -142,20 +118,15 @@ public abstract class ProtocolSocket extends ThreadedSocket implements SocketInt
 					} /* end try */
 					catch (InstantiationException e)
 					{
-						// TODO Auto-generated catch block
+						// TODO Determine what to do
 						e.printStackTrace();
 					} /* end catch */
 					catch( IllegalAccessException e)
 					{
-						// TODO Auto-generated catch block
+						// TODO Determine what to do
 						e.printStackTrace();
 					} /* end catch */
 				} /* end if */
-				
-				/* Finally, let the other threads know that they can send a 
-				 * message */
-				this.messagesReceived--;
-				this.LOCK.notifyAll();
 			} /* end synchronized block */
 			
 		} /* end loop */
@@ -177,40 +148,18 @@ public abstract class ProtocolSocket extends ThreadedSocket implements SocketInt
 	 * Sends a user-defined object that is derived from ProtocolMessage in a 
 	 * thread-safe way. The user will define exactly how ProtocolSocket will
 	 * send this message in the definedSendMessage method. This should only be
-	 * used by non Protocol objects
-	 * 
-	 * Note: No messages will be sent until the initialProcess method
-	 * is performed or if the terminate method is called.
-	 * @param message	the message to be sent over the socket
+	 * used by non Protocol objects. The message will be queued so that the 
+	 * thread can send the message.
+	 * @param message	the message to be sent
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
 	public final void sendMessage(ProtocolMessage message) throws InstantiationException, IllegalAccessException
 	{
-		/* Prevent a receiver from receiving */
-		this.messagesToSend.getAndIncrement();
-		synchronized(this.LOCK)
+		/* Control access to the queue */
+		synchronized(this.messageQueue)
 		{
-			/* Attempt to send a message only if no message was received */
-			while(this.messagesReceived > 0 && !this.done && this.initialized) 
-			{
-				try 
-				{
-					this.LOCK.wait();
-				} /* end try */
-				catch (InterruptedException e) 
-				{
-					// TODO Determine what to do during exception
-					e.printStackTrace();
-				} /* end catch */
-			} /* end while loop */
-			
-			/* Send the message */
-			this.protocols.process(message, Protocol.Stance.SENDING);
-			
-			/* Potentially let the receive through */
-			this.messagesToSend.getAndDecrement();
-			this.LOCK.notifyAll();
+			this.messageQueue.offer(message);
 		} /* end synchronized block */
 		
 	} /* end sendMessage method */
@@ -248,6 +197,53 @@ public abstract class ProtocolSocket extends ThreadedSocket implements SocketInt
 			this.definedSendMessage(message);
 		} /* end synchronized block */
 	} /* end protocolSendMessage method */
+	
+	/**
+	 * Processes and sends the entire messageQueue.
+	 */
+	private void processQueue()
+	{
+		ProtocolMessage message = null;
+		boolean empty = false;
+		while(!empty)
+		{
+			/* First, synchronously get the next message in the queue. This way, 
+			 * new messages can be added to the queue without others waiting on this
+			 * thread to process the message and thread-safety is maintained. */
+			synchronized(this.messageQueue)
+			{
+				message = this.messageQueue.poll();
+			} /* end synchronized block */
+			
+			if(message == null) empty = true;
+			else
+			{
+				/* Prevent anyone else from sending or receiving messages
+				 * (although no one should be able to, this is done just in 
+				 * case).*/
+				synchronized(this.LOCK)
+				{
+					try 
+					{
+						this.protocols.process(message, Protocol.Stance.SENDING);
+					} /* end try */
+					catch (InstantiationException e) 
+					{
+						// TODO Determine what to do
+						e.printStackTrace();
+					} /* end catch */
+					catch (IllegalAccessException e) 
+					{
+						// TODO Determine what to do
+						e.printStackTrace();
+					} /* end catch */
+				} /* end synchronized block */
+				
+			} /* end else */
+			
+		} /* end while loop */
+		
+	} /* end processQueue method */
 	
 	/**
 	 * This method is provided explicitly for Protocol objects. It simply 

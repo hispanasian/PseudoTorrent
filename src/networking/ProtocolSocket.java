@@ -3,7 +3,6 @@ package networking;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A ThreadedSocket that defines a thread-safe way to deal with protocols as 
@@ -22,7 +21,7 @@ public abstract class ProtocolSocket extends ThreadedSocket implements SocketInt
 	/******************* Class Attributes *******************/
 	protected ProtocolPackage protocols;
 	protected volatile boolean done;
-	private LinkedList<ProtocolMessage> messageQueue;
+	protected LinkedList<ProtocolMessage> messageQueue;
 	
 	/******************* Class Abstracts *******************/
 	/**
@@ -183,11 +182,10 @@ public abstract class ProtocolSocket extends ThreadedSocket implements SocketInt
 	
 	/**
 	 * This method is provided explicitly for Protocol objects. This allows the
-	 * process method to bypass the lock on sendMessage while there is a message
-	 * being processed. This is because the messagesReceived will still be 
-	 * marked greater than 0 in order to atomize the getMessage and process 
-	 * methods. Note, this should only be used by the Protocol object that is
-	 * called by this objects process method. 
+	 * process method to bypass the queue in sendMessage. This way, the 
+	 * the message that needs to be sent can be sent in the correct order. Note,
+	 * this should only be used by the Protocol object that is called by this
+	 * objects process method. 
 	 * @param message	the message to be sent
 	 */
 	public final void protocolSendMessage(ProtocolMessage message)

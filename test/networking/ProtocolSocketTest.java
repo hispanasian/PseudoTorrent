@@ -125,23 +125,26 @@ public class ProtocolSocketTest {
 
 		@Override
 		public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) {
+			System.out.println(Thread.currentThread().getName() + " p1 sent " +message);
+			/*
 			int i;
 			String hello = new String("hello");
 			TestMessage m = new TestMessage(null, 2, 1);
 			try
 			{
+				System.out.println(Thread.currentThread().getName() + " p1 sending " +m);
 				protocols.socket.protocolSendMessage(m);
-				System.out.println(Thread.currentThread().getName() + " p1 sent " +m);
 				m = new TestMessage(null, 3, 1);
+				System.out.println(Thread.currentThread().getName() + " p1 sending " +m);
 				protocols.socket.protocolSendMessage(m);
-				System.out.println(Thread.currentThread().getName() + " p1 sent " +m);
 				m = new TestMessage(null, 4, 1);
+				System.out.println(Thread.currentThread().getName() + " p1 sending " +m);
 				protocols.socket.protocolSendMessage(m);
-				System.out.println(Thread.currentThread().getName() + " p1 sent " +m);
 				m = new TestMessage(null, 5, 1);
+				System.out.println(Thread.currentThread().getName() + " p1 sending " +m);
 				protocols.socket.protocolSendMessage(m);
-				System.out.println(Thread.currentThread().getName() + " p1 sent " +m);
 				m = (TestMessage) protocols.socket.protocolGetMessage();
+				System.out.println(Thread.currentThread().getName() + " p1 got " +m);
 				if (!hello.equals(m.message)) i = 1 / 0;
 				else System.out.println(Thread.currentThread().getName() + " p1 send terminated correctly");
 			}
@@ -149,7 +152,7 @@ public class ProtocolSocketTest {
 			{
 				e.printStackTrace();
 				System.out.println("P1 send " + m );
-			}
+			}*/
 		}
 
 		@Override
@@ -163,27 +166,32 @@ public class ProtocolSocketTest {
 			{
 				if (m.stuff != 1)
 					i = 1 / 0;
-				m = (TestMessage) protocols.socket.protocolGetMessage();
+				/*m = (TestMessage) protocols.socket.protocolGetMessage();
+				System.out.println(Thread.currentThread().getName() + " p1 got " +m);
 				counter++;
 				if (m.stuff != 2)
 					i = 1 / 0;
 				m = (TestMessage) protocols.socket.protocolGetMessage();
+				System.out.println(Thread.currentThread().getName() + " p1 got " +m);
 				counter++;
 				if (m.stuff != 3)
 					i = 1 / 0;
 				m = (TestMessage) protocols.socket.protocolGetMessage();
+				System.out.println(Thread.currentThread().getName() + " p1 got " +m);
 				counter++;
 				if (m.stuff != 4)
 					i = 1 / 0;
 				m = (TestMessage) protocols.socket.protocolGetMessage();
+				System.out.println(Thread.currentThread().getName() + " p1 got " +m);
 				counter++;
 				if (m.stuff != 5)
 					i = 1 / 0;
 				else 
 				{
+					System.out.println(Thread.currentThread().getName() + " p1 sending " +m);
 					protocols.socket.protocolSendMessage(new TestMessage("hello", null, 1));
 					System.out.println(Thread.currentThread().getName() + " p1 receive terminated correctly");
-				}
+				}*/
 				
 			}
 			catch(ArithmeticException e)
@@ -199,7 +207,7 @@ public class ProtocolSocketTest {
 
 		@Override
 		public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) {
-			// TODO Auto-generated method stub
+			System.out.println(Thread.currentThread().getName() + " p2 sent " +message);
 
 		}
 
@@ -207,6 +215,7 @@ public class ProtocolSocketTest {
 		public void receiveProtocol(ProtocolPackage protocols,
 				ProtocolMessage message) {
 			ProtocolSocketInterface socket = protocols.socket;
+			System.out.println(Thread.currentThread().getName() + " p2 got " +message);
 			int i;
 			TestMessage m = (TestMessage) message;
 			try
@@ -226,10 +235,13 @@ public class ProtocolSocketTest {
 
 		@Override
 		public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) {
+			System.out.println(Thread.currentThread().getName() + " p3 sent " +message);
 			ProtocolSocketInterface socket = protocols.socket;
+			
 			int i;
 			TestMessage m = (TestMessage) protocols.socket.protocolGetMessage();
 			try {
+				System.out.println(Thread.currentThread().getName() + " p3 sending " +message);
 				protocols.process(m, Protocol.Stance.RECEIVING);
 			} catch (InstantiationException e) {
 				// TODO Auto-generated catch block
@@ -247,9 +259,11 @@ public class ProtocolSocketTest {
 			ProtocolSocketInterface socket = protocols.socket;
 			int i;
 			TestMessage m = (TestMessage) message;
+			System.out.println(Thread.currentThread().getName() + " p3 got " +m);
 			try
 			{
 				if (m.stuff != 20) i = 1 / 0;
+				System.out.println(Thread.currentThread().getName() + " p3 sending " +message);
 				socket.protocolSendMessage(new TestMessage(null, 10, 2));
 			}
 			catch(ArithmeticException e)
@@ -329,7 +343,50 @@ public class ProtocolSocketTest {
 				e.printStackTrace();
 			}
 		} /* end loop */
-
+		
+		boolean done = false;
+		
+		while(!done)
+		{
+			synchronized(receiver.messageQueue)
+			{
+				if(receiver.messageQueue.peek() == null) done = true;
+				else System.out.println("Receiver not done: " + sender.messageQueue.peek());
+			}
+			
+			if(!done)
+			{
+				try {
+					Thread.sleep(600);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		System.out.println("Receiver finished");
+		
+		done = false;
+		while(!done)
+		{
+			synchronized(sender.messageQueue)
+			{
+				if(sender.messageQueue.peek() == null) done = true;
+				else System.out.println("Sender not done: " + sender.messageQueue.peek());
+			}
+		
+			if(!done)
+			{
+				try {
+					Thread.sleep(600);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		System.out.println("Sender finished");
+		
 		receiver.terminate();
 		sender.terminate();
 		try {

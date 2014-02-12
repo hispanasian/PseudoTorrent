@@ -26,7 +26,7 @@ public class ProtocolPackageTest
 	public class TestProtocol extends Protocol
 	{
 		@Override
-		public void sendProtocol(ProtocolPackage protocols) {
+		public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) {
 			// TODO Auto-generated method stub
 			
 		}

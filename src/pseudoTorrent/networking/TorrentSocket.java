@@ -22,9 +22,6 @@ import networking.ProtocolSocket;
  */
 public class TorrentSocket extends ProtocolSocket
 {
-	/******************* Class Constants *******************/
-	public static final int TIMEOUT = 1000;
-	
 	/******************* Class Attributes *******************/
 	public final PseudoTorrent torrent;
 	public final boolean isSender;
@@ -42,6 +39,12 @@ public class TorrentSocket extends ProtocolSocket
 	public void initialProcess() 
 	{
 		// TODO Implement handshake here
+		/* Note that you must use the getPacket method here to get each byte
+		 * individually and similarly, use sendPacket to send each byte 
+		 * individually. If getMessage, sendMessage, definedGetMessage or 
+		 * definedSendMessage are used, the packet will be de-constructed 
+		 * according to spec (which the handshake does not follow).
+		 */
 		
 	} /* end initialProcess */
 

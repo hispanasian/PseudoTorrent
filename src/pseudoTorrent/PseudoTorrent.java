@@ -12,10 +12,5 @@ import tracking.Tracker;
 
 public class PseudoTorrent
 {
-	Tracker t;
-	
-	public void start() {
-		t = new Tracker(0, 0, 0, 0, 0);
-	}
 
 } /* end PseudoTorrent class */

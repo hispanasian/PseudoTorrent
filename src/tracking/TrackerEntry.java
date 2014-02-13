@@ -3,10 +3,16 @@ package tracking;
 import java.net.Socket;
 import java.util.BitSet;
 
+/**
+ * For use in Tracker lookup map.
+ * 
+ * @author Terek
+ *
+ */
 public class TrackerEntry 
 {
 	/******************* Class Constants *******************/
-	public final Socket socket; 		//socket the peer is uploading to
+	public final Socket socket; 		//socket the peer is uploading to TODO: should this be changed to diff type socket?
 
 	/******************* Class Attributes *******************/
 	public int bitsReceived;			//bit received in last p-second unchoking interval
@@ -16,7 +22,6 @@ public class TrackerEntry
 	public boolean isInteretested;		//whether the peer is interested in you still
 
 	/******************* Class Methods *******************/
-	
 	public TrackerEntry(final Socket socket)
 	{
 		this.socket = socket;

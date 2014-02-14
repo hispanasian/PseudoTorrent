@@ -37,7 +37,7 @@ public class TorrentSocketTest
 			try 
 			{
 				ProtocolPackage pr = new ProtocolPackage(3);
-				socket = new TorrentSocket(torrent, serverSocket.accept(), pr, false);
+				socket = new TorrentSocket(serverSocket.accept(), pr, false);
 
 			} /* end try */
 			catch (Exception e) 
@@ -72,7 +72,7 @@ public class TorrentSocketTest
 			this.server.start();
 			Thread.sleep(300);
 			Socket socket = new Socket("localhost", port);
-			this.sender = new TorrentSocket(torrent, socket, ps, true);
+			this.sender = new TorrentSocket(socket, ps, true);
 			this.receiver = server.socket;
 
 		} /* end try */

@@ -1,14 +1,11 @@
 package networking;
 
 import static org.junit.Assert.*;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

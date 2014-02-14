@@ -3,9 +3,10 @@ package pseudoTorrent.networking;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 
-import pseudoTorrent.PseudoTorrent;
+import pseudoTorrent.PeerProcess;
 import networking.ProtocolMessage;
 import networking.ProtocolPackage;
 import networking.ProtocolSocket;
@@ -23,16 +24,22 @@ import networking.ProtocolSocket;
 public class TorrentSocket extends ProtocolSocket
 {
 	/******************* Class Attributes *******************/
-	public final PseudoTorrent torrent;
 	public final boolean isSender;
+	private Integer peerID;
+	private int request;	/* the previously requested piece */
 	
 	/******************* Class Methods *******************/
-	public TorrentSocket(PseudoTorrent torrent, final Socket socket, ProtocolPackage protocols, boolean isSender) throws SocketException, IOException
+	public TorrentSocket(Integer peerID, final Socket socket, ProtocolPackage protocols, boolean isSender) throws SocketException, IOException
 	{
 		super(socket, protocols);
-		this.torrent = torrent;
+		this.peerID = peerID;
 		this.socket.setSoTimeout(TIMEOUT);
 		this.isSender = isSender;
+	} /* end constructor */
+	
+	public TorrentSocket(final Socket socket, ProtocolPackage protocols, boolean isSender) throws SocketException, IOException
+	{
+		this(null, socket, protocols, isSender);
 	} /* end constructor */
 
 	@Override
@@ -114,7 +121,7 @@ public class TorrentSocket extends ProtocolSocket
 	protected void definedSendMessage(ProtocolMessage message) 
 	{
 		byte[] packet = ((Message) message).toBytes();
-		for(int i = 0; i < packet.length; i++)
+		for(int i = 0; i < packet.length;  i++)
 		{// TODO: Define what happens during exception
 			try 
 			{
@@ -128,5 +135,132 @@ public class TorrentSocket extends ProtocolSocket
 		} /* end for loop */
 		
 	} /* end definedSendMessage method */
+	
+	/**
+	 * Returns a handshake that will be used by this Peer. A handshake has the
+	 * following form: 
+	 * HELLO (5 bytes) 0(23 bytes) peerID (4 bytes)
+	 * 
+	 * Note that this requires PeerProcess to exist and provide this method the
+	 * peerID of this Peer
+	 * @return	the handshake that will be used by this Peer
+	 */
+	public Byte[] makeHandshake()
+	{
+		Byte[] handshake = new Byte[32];
+		
+		/* Make first 4 bytes, "HELLO" */
+		handshake[0] = new Byte("H");
+		handshake[1] = new Byte("E");
+		handshake[2] = new Byte("L");
+		handshake[3] = new Byte("L");
+		handshake[4] = new Byte("O");
+		
+		/* Make next 23 bytes: a series of 0 */
+		for(int i = 5; i < 28; i++)
+		{
+			handshake[i] = 0;
+		} /* end for loop */
+		
+		/* Make last bytes, the peer ID */
+		byte[] peerID = Message.intToBytes(PeerProcess.getPeerID());
+		
+		handshake[28] = peerID[0];
+		handshake[29] = peerID[1];
+		handshake[30] = peerID[2];
+		handshake[31] = peerID[3];
+		
+		return handshake;
+	} /* end makeHandshake method */
+	
+	/**
+	 * Sends a handshake to the peer. 
+	 * 
+	 */
+	public void sendHandshake()
+	{
+		Byte[] handshake = this.makeHandshake();
+		
+		/* Send the handshake */
+		for(int i = 0; i < handshake.length; i++)
+		{
+			try 
+			{
+				this.sendPacket(handshake[i]);
+			} /* end try */ 
+			catch (IOException e) 
+			{
+				// TODO Decide what to do for exception
+				e.printStackTrace();
+			} /* end catch */
+		} /* end for loop */
+		
+	} /* end sendHandhsake method */
+	
+	/**
+	 * Get's the handshake from a Peer and returns the Integer representing the
+	 * peers id or NULL if the handshake was incorrect.
+	 * @return
+	 */
+	public Integer getHandshake()
+	{
+		Byte[] handshake = new Byte[32];
+		Integer peerID = null;
+		
+		/* The handshake should be 32 bytes */
+		for(int i = 0; i < 32; i++)
+		{
+			try 
+			{
+				handshake[i] = (Byte) this.getPacket();
+			} /* end try */
+			catch (SocketTimeoutException e) 
+			{
+				// TODO Determine what to do
+				e.printStackTrace();
+			} /* end catch */
+			catch (ClassNotFoundException e) 
+			{
+				// TODO Determine what to do
+				e.printStackTrace();
+			} /* end catch */
+			catch (IOException e) 
+			{
+				// TODO Determine what to do
+				e.printStackTrace();
+			} /* end catch */
+		} /* end for loop */
+		
+		/* Check the handshake */
+		Byte h = new Byte("H");
+		Byte e = new Byte("E");
+		Byte l = new Byte("L");
+		Byte o = new Byte("O");
+		
+		if(h.equals(handshake[0]) &&
+				e.equals(handshake[1]) &&
+				l.equals(handshake[2]) &&
+				l.equals(handshake[3]) &&
+				o.equals(handshake[4]))
+		{ /* The handshake is correct, get the peerID */
+			byte[] id = new byte[4];
+			id[0] = handshake[28];
+			id[1] = handshake[29];
+			id[2] = handshake[30];
+			id[3] = handshake[31];
+			peerID = Message.bytesToInt(id);
+		} /* end if */
+		
+		return peerID;
+	} /* end getHandshake method */
+	
+	/**
+	 * Returns the peerID of the Peer this socket connects to
+	 * @return	the peerID of the Peer this socket connects to
+	 */
+	public int getPeerID()
+	{
+		return this.peerID;
+	} /* end getPeerID method */
 	
 } /* end TorrentSocket class */

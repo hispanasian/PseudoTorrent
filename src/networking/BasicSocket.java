@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
+
 /**
  * The BasicSocket class will be used to provide some basic functionality that
  * will be used by derived classes.

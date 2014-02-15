@@ -41,6 +41,8 @@ public class PeerProcess
 		loadCommonCfg();
 		loadPeerInfoCfg();
 		ServerSocket listenSocket = new ServerSocket(listenPort);
+		
+		
 		//TODO: while loop for accepting requests
 		//Process HTTP service request in an infinite loop.
 //		while (true) {

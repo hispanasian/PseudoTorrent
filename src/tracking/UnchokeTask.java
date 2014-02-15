@@ -15,6 +15,6 @@ public class UnchokeTask extends TimerTask {
     public void run() 
 	{
 		Tracker.updateTopK();
-		cancel();
+		System.out.println("updated TopK");
 	}
 }

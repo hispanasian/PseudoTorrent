@@ -1,7 +1,7 @@
 package tracking;
 
-import java.net.Socket;
 import java.util.BitSet;
+import pseudoTorrent.networking.*;;
 
 /**
  * For use in Tracker lookup map.
@@ -12,7 +12,7 @@ import java.util.BitSet;
 public class TrackerEntry 
 {
 	/******************* Class Constants *******************/
-	public final Socket socket; 		//socket the peer is uploading to TODO: should this be changed to diff type socket?
+	public final TorrentSocket socket; 		//socket the peer is uploading to TODO: should this be changed to diff type socket?
 
 	/******************* Class Attributes *******************/
 	public int bitsReceived;			//bit received in last p-second unchoking interval
@@ -22,7 +22,7 @@ public class TrackerEntry
 	public boolean isInteretested;		//whether the peer is interested in you still
 
 	/******************* Class Methods *******************/
-	public TrackerEntry(final Socket socket)
+	public TrackerEntry(final TorrentSocket socket)
 	{
 		this.socket = socket;
 		this.choked = false;
@@ -32,7 +32,7 @@ public class TrackerEntry
 		
 	} /* end Constructor */
 	
-	public TrackerEntry(final Socket socket, boolean choked)
+	public TrackerEntry(final TorrentSocket socket, boolean choked)
 	{
 		this.socket = socket;
 		this.choked = choked;
@@ -42,7 +42,7 @@ public class TrackerEntry
 		
 	} /* end Constructor */
 	
-	public TrackerEntry(final Socket socket, boolean choked, boolean choking)
+	public TrackerEntry(final TorrentSocket socket, boolean choked, boolean choking)
 	{
 		this.socket = socket;
 		this.choked = choked;
@@ -52,7 +52,7 @@ public class TrackerEntry
 		
 	} /* end Constructor */
 	
-	public TrackerEntry(final Socket socket, boolean choked, boolean choking, boolean interested)
+	public TrackerEntry(final TorrentSocket socket, boolean choked, boolean choking, boolean interested)
 	{
 		this.socket = socket;
 		this.choked = choked;

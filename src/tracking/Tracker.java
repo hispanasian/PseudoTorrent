@@ -1,6 +1,5 @@
 package tracking;
 
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -9,6 +8,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+
+import pseudoTorrent.networking.*;
 
 
 /**
@@ -42,8 +43,12 @@ public class Tracker
 	
 	/******************* Class Methods *******************/
 	
+	private Tracker () {
+		
+	}
+	
 	/**
-	 * Creates a Tracker.  This should be created once at the start of main for a peer process.
+	 * Setup a Tracker.  This should be created once at the start of main for a peer process.
 	 * 
 	 * @param numPrefNeighbors				the number of preferred neighbors as specified in Common.cfg
 	 * @param unchokeInterval				the unchoke interval as specified in Common.cfg
@@ -52,7 +57,7 @@ public class Tracker
 	 * @param pieceSize						the piece size as specified in Common.cfg
 	 * 
 	 */
-	public Tracker (int numPrefNeighbors, int unchokeInterval, int optimisticUnchokeInterval, int fileSize, int pieceSize)
+	public static synchronized void setup (int numPrefNeighbors, int unchokeInterval, int optimisticUnchokeInterval, int fileSize, int pieceSize)
 	{
 		Tracker.lookup = new Hashtable<Integer, TrackerEntry>();
 		Tracker.numPieces = fileSize / pieceSize;
@@ -81,22 +86,26 @@ public class Tracker
 		Iterator<Entry<Integer, TrackerEntry>> it = Tracker.lookup.entrySet().iterator();
         while (it.hasNext()) {
         	Map.Entry<Integer, TrackerEntry> entry = (Map.Entry<Integer, TrackerEntry>)it.next();
+//        	System.out.println(entry.getKey() + " " + entry.getValue().bitsReceived);
         	Tracker.AllRank.add(new PeerRankEntry(entry.getKey(), entry.getValue().bitsReceived, entry.getValue().isInteretested));
-        	it.remove();// avoids a ConcurrentModificationException
+        	//it.remove();// avoids a ConcurrentModificationException
         }
         
+//        System.out.println("Size of lookup: " + Tracker.lookup.size());
+//        System.out.println("Size of AllRank: " + Tracker.AllRank.size());
         Collections.sort(Tracker.AllRank, PeerRankEntry.DESCENDING_COMPARATOR);
         
         int i = 0;
         for (PeerRankEntry e : Tracker.AllRank) {
         	if ((i < Tracker.numPrefNeighbors) && (e.isInterested)){
+//        		System.out.println(e.peerID);
         		Tracker.UnchokedTopK.add(e.peerID);
         		i++;
         	}
         	
         }
         
-        for (int j=Tracker.numPrefNeighbors; j < Tracker.AllRank.size(); j++) {
+        for (int j = Tracker.numPrefNeighbors; j < Tracker.AllRank.size(); j++) {
         	if (Tracker.AllRank.get(j).isInterested) {
             	Tracker.Choked.add(Tracker.AllRank.get(j));
         	}
@@ -104,9 +113,9 @@ public class Tracker
         
 		Iterator<Entry<Integer, TrackerEntry>> it2 = Tracker.lookup.entrySet().iterator();
         while (it2.hasNext()) {
-        	Map.Entry<Integer, TrackerEntry> entry = (Map.Entry<Integer, TrackerEntry>)it.next();
+        	Map.Entry<Integer, TrackerEntry> entry = (Map.Entry<Integer, TrackerEntry>)it2.next();
         	entry.getValue().bitsReceived = 0;			//reset bitsRecieved
-        	it2.remove();// avoids a ConcurrentModificationException
+        	//it2.remove();// avoids a ConcurrentModificationException
         }
 	}
 	
@@ -135,7 +144,7 @@ public class Tracker
 		}
 	}
 	
-	//TODO: should we update after every add?  should the type socket be changed?
+	//TODO: should we update after every add?  should the type socket be changed?  Torrent Socket!
 	/**
 	 * Allows the user to add a peer and associated socket to the lookup map.  This should be invoked at
 	 * the start of main as threads are being spun up.  
@@ -144,9 +153,10 @@ public class Tracker
 	 * @param socket	the socket the peer is using
 	 * 
 	 */
-	public static synchronized void add(int peerID, final Socket socket)
+	public static synchronized void add(int peerID, final TorrentSocket socket)
 	{
 		/* Map the peerID to tracker entry */
+		System.out.println("HERE");
 		Tracker.lookup.put(peerID, new TrackerEntry(socket));
 		//Tracker.updateTopK();
 		//Tracker.findOptimalNeighbor();
@@ -158,7 +168,7 @@ public class Tracker
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public static synchronized void choke (int peerID) 
+	protected static synchronized void choke (int peerID) 
 	{
 		Tracker.lookup.get(peerID).choked = true;
 	}
@@ -169,7 +179,7 @@ public class Tracker
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public static synchronized void unchoke (int peerID) 
+	protected static synchronized void unchoke (int peerID) 
 	{
 		Tracker.lookup.get(peerID).choked = false;
 	}
@@ -181,6 +191,7 @@ public class Tracker
 	 * 
 	 */	
 	public synchronized boolean getIsChoked (int peerID) {
+		if (Tracker.lookup.isEmpty()) {return true;} //TODO: do I need this?
 		return Tracker.lookup.get(peerID).choked;
 	}
 	
@@ -227,8 +238,8 @@ public class Tracker
 	 * @param numBits	the number of bits to add to this peer
 	 * 
 	 */
-	public synchronized void addBits (int peerID, int numBits) {
-		Tracker.lookup.get(peerID).bitsReceived += numBits;
+	public static synchronized void addBytes (int peerID, int bytes) {
+		Tracker.lookup.get(peerID).bitsReceived += bytes;
 	}
 	
 	/**
@@ -237,7 +248,7 @@ public class Tracker
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public synchronized boolean hasFile (int peerID) 
+	public static synchronized boolean hasFile (int peerID) 
 	{
 		BitSet temp = (BitSet) Tracker.lookup.get(peerID).bitfield.clone();
 		//TODO:temp.flip(i);
@@ -252,7 +263,7 @@ public class Tracker
 	 * @param piece		the piece that needs to be updated in the bitfield
 	 * 
 	 */
-	public synchronized void updateBitfield (int peerID, int piece) 
+	public static synchronized void updateBitfield (int peerID, int piece) 
 	{
 		Tracker.lookup.get(peerID).bitfield.set(piece);
 	}
@@ -263,7 +274,7 @@ public class Tracker
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public synchronized BitSet getBitfield (int peerID) 
+	public static synchronized BitSet getBitfield (int peerID) 
 	{
 		return Tracker.lookup.get(peerID).bitfield;
 	}
@@ -274,7 +285,7 @@ public class Tracker
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public synchronized void setInterested (int peerID, boolean isInterested) 
+	public static synchronized void setInterested (int peerID, boolean isInterested) 
 	{
 		Tracker.lookup.get(peerID).isInteretested = isInterested;
 	}
@@ -285,7 +296,7 @@ public class Tracker
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public synchronized boolean getInterested (int peerID) 
+	public static synchronized boolean getInterested (int peerID) 
 	{
 		return Tracker.lookup.get(peerID).isInteretested;
 	}

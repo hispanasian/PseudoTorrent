@@ -2,6 +2,10 @@ package pseudoTorrent.networking;
 
 import static org.junit.Assert.*;
 
+import host.Host;
+import host.UnchokeTask;
+import host.UnchokeTimer;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -15,9 +19,6 @@ import org.junit.Test;
 import pseudoTorrent.PseudoTorrent;
 import pseudoTorrent.networking.Message;
 import pseudoTorrent.networking.TorrentSocket;
-import tracking.Tracker;
-import tracking.UnchokeTask;
-import tracking.UnchokeTimer;
 
 /**
  * Tests for TorrentSocket
@@ -80,7 +81,7 @@ public class TrackerTest
 			Socket socket = new Socket("localhost", port);
 			this.sender = new TorrentSocket(torrent, socket, ps, true);
 			this.receiver = server.socket;
-			Tracker.setup(3, 6, 10, 1000, 98);
+			Host.setup(3, 6, 10, 1000, 98);
 
 		} /* end try */
 		catch (Exception e)
@@ -117,23 +118,23 @@ public class TrackerTest
 	
 	@Test
 	public void testTrackerAdd() {
-		Tracker.add(1001, server.socket);
-		Tracker.add(1002, server.socket);
-		Tracker.add(1003, server.socket);
-		Tracker.add(1004, server.socket);
-		Tracker.add(1005, server.socket);
-		Tracker.add(1006, server.socket);
+		Host.add(1001, server.socket);
+		Host.add(1002, server.socket);
+		Host.add(1003, server.socket);
+		Host.add(1004, server.socket);
+		Host.add(1005, server.socket);
+		Host.add(1006, server.socket);
 		
-		System.out.println(Tracker.lookup.get(1001).socket);
-		System.out.println(Tracker.lookup.size());
-		Tracker.setInterested(1001, true);
-		Tracker.setInterested(1002, true);
-		Tracker.setInterested(1003, true);
-		Tracker.setInterested(1004, true);
-		Tracker.setInterested(1005, true);
-		Tracker.setInterested(1006, false);
+		System.out.println(Host.lookup.get(1001).socket);
+		System.out.println(Host.lookup.size());
+		Host.setInterested(1001, true);
+		Host.setInterested(1002, true);
+		Host.setInterested(1003, true);
+		Host.setInterested(1004, true);
+		Host.setInterested(1005, true);
+		Host.setInterested(1006, false);
 		
-		System.out.println(Tracker.getInterested(1004));
+		System.out.println(Host.getInterested(1004));
 		
 		new UnchokeTimer();
 		
@@ -145,8 +146,8 @@ public class TrackerTest
 		}
 		
 		System.out.println("Printing top k");
-		for (int i = 0; i < Tracker.UnchokedTopK.size(); i++) {
-			System.out.println(Tracker.UnchokedTopK.get(i));
+		for (int i = 0; i < Host.UnchokedTopK.size(); i++) {
+			System.out.println(Host.UnchokedTopK.get(i));
 		}
 		
 		try {

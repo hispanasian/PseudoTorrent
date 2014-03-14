@@ -1,6 +1,6 @@
 package pseudoTorrent;
 
-import tracking.Tracker;
+import host.Host;
 
 /**
  * The PseudoTorrent class will contain and provide the necessary meta-data 

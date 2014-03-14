@@ -11,18 +11,32 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-
+/*
+ * @author KiranRohankar
+ * @description: this class is responsible for file reading and fragmenting it into number of chunks depending on the 
+ * chunk size.
+ * 
+ */
 
 public class ByteReadAndWrite {
 	
+	/*
+	 * @param: File path as String
+	 * @param: chunk size
+	 * @return:Arraylist of chunk files.
+	 * 
+	 */
+	
+	
 	public ArrayList<String> readAndFragment ( String SourceFileName, int CHUNK_SIZE ) throws IOException
 	 {
+		
 	  //log ("File Is Reading "+ SourceFileName );
 	  File willBeRead = new File ( "Richie.mp3" );
 	  int FILE_SIZE = (int) willBeRead.length();
 	  ArrayList<String> nameList = new ArrayList<String> ();
 	  
-	  System.out.println("Total File Size: "+FILE_SIZE);
+	//  System.out.println("Total File Size: "+FILE_SIZE);
 	  
 	  int NUMBER_OF_CHUNKS = 0;
 	  byte[] temporary = null;
@@ -36,13 +50,13 @@ public class ByteReadAndWrite {
 	    
 	    while ( totalBytesRead < FILE_SIZE )
 	    {
-	     String PART_NAME ="data"+NUMBER_OF_CHUNKS+".bin";
+	     String PART_NAME =NUMBER_OF_CHUNKS+"";
 	     int bytesRemaining = FILE_SIZE-totalBytesRead;
 	     if ( bytesRemaining < CHUNK_SIZE ) // Remaining Data Part is Smaller Than CHUNK_SIZE
 	                // CHUNK_SIZE is assigned to remain volume
 	     {
 	      CHUNK_SIZE = bytesRemaining;
-	      System.out.println("CHUNK_SIZE: "+CHUNK_SIZE);
+	    //  System.out.println("CHUNK_SIZE: "+CHUNK_SIZE);
 	     }
 	     temporary = new byte[CHUNK_SIZE]; //Temporary Byte Array
 	     int bytesRead = inStream.read(temporary, 0, CHUNK_SIZE);
@@ -55,7 +69,7 @@ public class ByteReadAndWrite {
 	     
 	     write(temporary, PART_NAME);
 	     nameList.add(PART_NAME);
-	     System.out.println("Total Bytes Read: "+totalBytesRead);
+	  //   System.out.println("Total Bytes Read: "+totalBytesRead);
 	    }
 	    
 	   }
@@ -80,7 +94,7 @@ public class ByteReadAndWrite {
 	       try {
 	         output = new BufferedOutputStream(new FileOutputStream(DestinationFileName));
 	         output.write( DataByteArray );
-	         System.out.println("Writing Process Was Performed");
+	     //    System.out.println("Writing Process Was Performed");
 	       }
 	       finally {
 	         output.close();
@@ -93,6 +107,13 @@ public class ByteReadAndWrite {
 	      ex.printStackTrace();
 	     }
 	 }
+	 
+	 /*
+		 * @param: Arralist of chunk
+		 * @param: Destination merged file path to store
+		 * 
+		 * 
+		 */
 	 
 	 public void mergeParts ( ArrayList<String> nameList, String DESTINATION_PATH )
 	 {
@@ -141,6 +162,61 @@ public class ByteReadAndWrite {
 	  System.out.println("Merge was executed successfully.!");
 	  
 	 }
+	 
+	 /*
+	  * 
+	  */
+	 public byte[] getChunk(int chunkId)
+	 {
+		 //check if the file exist if not then throw exception
+		 //if file exist copy the whole file into temporary array
+		 //return the temp array.
+		 String filepath=chunkId+"";
+		 File file= new File(filepath);
+		 byte [] temp= null;
+		 try {
+			 InputStream istream=new BufferedInputStream(new FileInputStream(file));
+			 int filesize= (int)file.length();
+			 temp=new byte[filesize];
+			 istream.read(temp);
+			 istream.close();
+			 
+		} catch (FileNotFoundException e) {
+			System.out.println("File is not found");
+			e.printStackTrace();
+		}
+		 catch (IOException e) {
+			System.out.println("Some kind of IO exeption occured");
+			e.printStackTrace();
+		}
+		 
+		 
+		 
+		 
+		
+		 
+		 return temp;
+	 }
+	 public boolean giveChunk(int chunkId,byte [] chunk)
+	 {
+		 String filepath=chunkId+"";
+		write(chunk, filepath); 
+		 return true;
+	 }
+	 
+	public static void main(String[] args) {
+		try {
+		ByteReadAndWrite b= new ByteReadAndWrite();
+		//ArrayList<String> str=	new ByteReadAndWrite().readAndFragment("Richie.mp3", 1000000);
+		//System.out.println(str.get(0));
+			byte[] arr= b.getChunk(0);
+			System.out.println("my length is"+arr.length);
+			b.giveChunk(4, arr);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	 
 }
 	 
 	

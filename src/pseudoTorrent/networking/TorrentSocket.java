@@ -53,6 +53,14 @@ public class TorrentSocket extends ProtocolSocket
 		 * according to spec (which the handshake does not follow).
 		 */
 		
+		//steps:
+		//make the tcp connection with the peerID.
+		//you have to use makeHandshake and sendHandshake
+		
+		
+		
+		
+		
 	} /* end initialProcess */
 
 	@Override

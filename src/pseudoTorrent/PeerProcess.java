@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.util.BitSet;
 import java.util.StringTokenizer;
 
+import pseudoTorrent.networking.TorrentServer;
+
 public class PeerProcess 
 {
 	/******************* Class Attributes *******************/
@@ -95,13 +97,7 @@ public class PeerProcess
 			} catch (IOException ex) {ex.printStackTrace();}
 		}
 		
-//		System.out.println(numPrefNeighbors);
-//		System.out.println(unchokeInterval);
-//		System.out.println(optimisticUnchokeInterval);
-//		System.out.println(fileName);
-//		System.out.println(fileSize);
-//		System.out.println(pieceSize);
-//		System.out.println(numPieces);
+
 	}
 
 	private static void loadPeerInfoCfg() {
@@ -116,13 +112,12 @@ public class PeerProcess
 				StringTokenizer tokens = new StringTokenizer (line);
 				readPeerID = Integer.parseInt(tokens.nextToken());
 				if (peerID > readPeerID){
-					String host = tokens.nextToken();
+				//	String host = tokens.nextToken();
 					int port = Integer.parseInt(tokens.nextToken());
-					InetAddress address = InetAddress.getByName(host);//probably don't need this
-					Socket clientSocket = new Socket(address, port);
-					//TODO:startup port to that peer
-					//TODO:create thread to handle each peer TCP
-					System.out.println("Set up port to: " + readPeerID);
+					TorrentServer ts= new TorrentServer(port);
+					Thread serverThread = new Thread(ts);
+					serverThread.start();
+				//	System.out.println("Set up port to: " + readPeerID);
 				}
 				if (peerID == readPeerID){
 					tokens.nextToken();

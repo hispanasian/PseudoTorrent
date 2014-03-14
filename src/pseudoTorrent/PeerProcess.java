@@ -150,5 +150,14 @@ public class PeerProcess
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Returns the peerID of this PeerProcess
+	 * @return	the peerID of this PeerProcess
+	 */
+	public static int getPeerID()
+	{
+		return PeerProcess.peerID;
+	} /* end getPeerID */
     
 } /* end PeerProcess class */

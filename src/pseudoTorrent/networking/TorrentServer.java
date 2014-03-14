@@ -3,10 +3,8 @@ package pseudoTorrent.networking;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-
 import networking.ProtocolPackage;
 
-import pseudoTorrent.PseudoTorrent;
 
 
 /**
@@ -19,13 +17,11 @@ import pseudoTorrent.PseudoTorrent;
 public class TorrentServer implements Runnable
 {
 	/******************* Class Attributes *******************/
-	private final PseudoTorrent torrent;
 	private final ServerSocket server;
 	
 	/******************* Class Methods *******************/
-	public TorrentServer(final PseudoTorrent torrent, int port) throws IOException
+	public TorrentServer(int port) throws IOException
 	{
-		this.torrent = torrent;
 		this.server = new ServerSocket(port);
 	} /* end TorrentServer method */
 
@@ -41,7 +37,7 @@ public class TorrentServer implements Runnable
 				socket = null;
 				protocols = new ProtocolPackage();
 				socket = server.accept();
-				if(socket != null) new TorrentSocket(torrent, socket, protocols, true).start();
+				if(socket != null) new TorrentSocket(socket, protocols, true).start();
 			} /* end try */
 			catch (Exception e) 
 			{

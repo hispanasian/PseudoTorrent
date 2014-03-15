@@ -19,7 +19,6 @@ public class HostEntry
 	public boolean choked;				//whether the peer is choked or not	
 	public boolean choking;				//whether the peer is choking you
 	public BitSet bitfield;				//bitset for the peer (what bits the peer has)
-	public BitSet randBitfield;			//bitset for use by random generator
 	public boolean peerInterested;		//whether the peer is interested in the host still
 	public boolean hostInterested;		//whether the host is interested in this peer still
 
@@ -27,8 +26,8 @@ public class HostEntry
 	public HostEntry(final TorrentSocket socket)
 	{
 		this.socket = socket;
-		this.choked = false;
-		this.choking = false;
+		this.choked = true;
+		this.choking = true;
 		this.bitsReceived = 0;
 		this.peerInterested = false;
 		this.hostInterested = false;
@@ -38,11 +37,10 @@ public class HostEntry
 	public HostEntry(final TorrentSocket socket, int bitfieldSize)
 	{
 		this.socket = socket;
-		this.choked = false;
-		this.choking = false;
+		this.choked = true;
+		this.choking = true;
 		this.bitsReceived = 0;
 		this.bitfield = new BitSet (bitfieldSize);
-		this.randBitfield = new BitSet (bitfieldSize);
 		this.peerInterested = false;
 		this.hostInterested = false;
 		

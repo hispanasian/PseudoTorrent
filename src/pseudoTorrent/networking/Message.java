@@ -121,7 +121,7 @@ public class Message implements ProtocolMessage
 	 * @param type		the type of message
 	 * @param payload	the message payload
 	 */
-	protected Message(Type type)
+	public Message(Type type)
 	{
 		this.length = 1;
 		this.type = type;

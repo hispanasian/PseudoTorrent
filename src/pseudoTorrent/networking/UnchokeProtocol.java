@@ -17,14 +17,14 @@ public class UnchokeProtocol extends Protocol
 	@Override
 	public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		Host.log.logChoking(((TorrentSocket) protocols.getSocket()).getPeerID());
+		Host.log.logUnchoking(((TorrentSocket) protocols.getSocket()).getPeerID());
 		
 	} /* end sendProtocol method */
 
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		Host.chokedBy(((TorrentSocket) protocols.getSocket()).getPeerID());
+		Host.unchokedBy(((TorrentSocket) protocols.getSocket()).getPeerID());
 		
 	} /* end receiveProtocol method */
 

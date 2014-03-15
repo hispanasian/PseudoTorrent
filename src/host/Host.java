@@ -215,8 +215,8 @@ public class Host
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public static synchronized void isInterested (int peerID) {
-		Host.lookup.get(peerID).hostInterested = true;
+	public static synchronized boolean isInterested (int peerID) {
+		return Host.lookup.get(peerID).hostInterested;
 	}
 	
 	//TODO:

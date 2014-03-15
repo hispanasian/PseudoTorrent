@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-
 import networking.Protocol;
 import networking.ProtocolMessage;
 import networking.ProtocolPackage;

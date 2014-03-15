@@ -1,5 +1,6 @@
 package pseudoTorrent.networking;
 
+import host.Host;
 import networking.Protocol;
 import networking.ProtocolMessage;
 import networking.ProtocolPackage;
@@ -16,14 +17,14 @@ public class ChokeProtocol extends Protocol
 	@Override
 	public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		Host.log.logChoking(((TorrentSocket) protocols.getSocket()).getPeerID());
 		
 	} /* end sendProtocol method */
 
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		Host.chokedBy(((TorrentSocket) protocols.getSocket()).getPeerID());
 		
 	} /* end receiveProtocol method */
 

@@ -90,6 +90,12 @@ public class ProtocolSocketTest {
 				e.printStackTrace();
 			}
 		} /* end definedSendMessage */
+
+		@Override
+		public int getPeerID() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 	} /* end TestSocket */
 
 	public static class TestServer implements Runnable {

@@ -1,6 +1,8 @@
 package pseudoTorrent;
 
 import host.Host;
+import host.OptUnchokeTimer;
+import host.UnchokeTimer;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -52,8 +54,8 @@ public class PeerProcess
 		Host.setHostID(peer.hostID);
 		peer.loadCommonCfg();
 		peer.loadPeerInfoCfg();
-		
-		
+		new UnchokeTimer();
+		new OptUnchokeTimer();
 	}
 	
 	private  void loadCommonCfg() {

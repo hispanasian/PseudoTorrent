@@ -64,22 +64,22 @@ public class TorrentLogger extends Logger
 	
 	/**
 	 * Logs the change of preferred neighbors
-	 * @param neighbor	an array with the neighbors that became the	proffered 
+	 * @param integers	an array with the neighbors that became the	proffered 
 	 * 					neighbors
 	 */
-	public void logChangePreferredNeighbors(int[] neighbor)
+	public void logChangePreferredNeighbors(Integer[] integers)
 	{
 		StringBuffer content = new StringBuffer();
 		content.append(preamble() + " has the preferred neighbors ");
 		
 		/* Append the neighbors */
-		for(int i = 0; i < (neighbor.length - 1); i++)
+		for(int i = 0; i < (integers.length - 1); i++)
 		{
-			content.append(neighbor[i] + ", ");
+			content.append(integers[i] + ", ");
 		} /* end for loop */
 		
 		/* Append the last neighbor */
-		content.append(neighbor[neighbor.length - 1] + ". \n");
+		content.append(integers[integers.length - 1] + ". \n");
 		
 		this.writeToFile(content.toString());
 	} /* end logChangePreferredNeighbors method */

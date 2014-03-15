@@ -99,7 +99,6 @@ public class Host
 	public static synchronized void add(int peerID, final TorrentSocket socket)
 	{
 		/* Map the peerID to tracker entry */
-		System.out.println("HERE");
 		Host.lookup.put(peerID, new HostEntry(socket));
 		//Tracker.updateTopK();
 		//Tracker.findOptimalNeighbor();

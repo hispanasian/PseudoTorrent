@@ -55,7 +55,7 @@ public class MessageTest
 	@Theory
 	public void payloadToIntTest(int payload)
 	{
-		Message.Type type = Message.Type.REQUESET;
+		Message.Type type = Message.Type.REQUEST;
 		Message test = new Message(type, payload);
 		assertEquals("Payload must be " + payload, payload, test.payloadToInt());
 	} /* end bytesToIntTest */

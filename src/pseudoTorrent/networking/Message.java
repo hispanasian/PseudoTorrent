@@ -34,7 +34,7 @@ public class Message implements ProtocolMessage
 		NOT_INTERESTED(3),
 		HAVE(4),
 		BITFIELD(5),
-		REQUESET(6),
+		REQUEST(6),
 		PIECE(7);
 		
 		public final Integer val;
@@ -264,7 +264,7 @@ public class Message implements ProtocolMessage
 			break;
 			case 5: returner = Type.BITFIELD;
 			break;
-			case 6: returner = Type.REQUESET;
+			case 6: returner = Type.REQUEST;
 			break;
 			case 7: returner = Type.PIECE;
 			break;

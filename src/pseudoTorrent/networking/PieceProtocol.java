@@ -65,7 +65,7 @@ public class PieceProtocol extends Protocol
 			{
 				chunkID = Host.getRandomChunkID(peerID);
 				((TorrentSocket) protocols.getSocket()).request = chunkID;
-				nextMessage = new Message(Message.Type.REQUESET, chunkID);
+				nextMessage = new Message(Message.Type.REQUEST, chunkID);
 			} /* end if */
 				
 		} /* end if */

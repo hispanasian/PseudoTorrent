@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import pseudoTorrent.PeerProcess;
 import networking.ProtocolMessage;
 import networking.ProtocolPackage;
 import networking.ProtocolSocket;
@@ -69,6 +68,9 @@ public class TorrentSocket extends ProtocolSocket
 				/* Correct handshake, continue */
 				Message bitfield = new Message(Message.Type.BITFIELD, Host.getHostBitfield());
 				this.definedSendMessage(bitfield);
+				
+				/* If a bitfield is received from the peer, it will be taken 
+				 * care of by the BitfieldProtocol */
 			} /* end else */
 			
 		} /* end if */
@@ -76,9 +78,26 @@ public class TorrentSocket extends ProtocolSocket
 		{
 			/* Receiver receives first handshake */
 			this.peerID = this.getHandshake();
-			Host.add(this.peerID, this);
 			this.sendHandshake();
+			Message bitfield = (Message) this.definedGetMessage();
+			
+			if(bitfield.type != Message.Type.BITFIELD)
+			{
+				/* Incorrect message received */
+				this.terminate();
+			} /* end if */
+			else
+			{
+				Host.add(this.peerID, this);
+				Host.setPeerBitfield(this.peerID, bitfield.payloadToBitSet());
+			} /* end else */
 		} /* end else */
+		
+		/* If there were no issues, log the connection */
+		if(this.done)
+		{
+			Host.log.logTCPConnection(this.peerID, isSender);
+		} /* end if */
 		
 	} /* end initialProcess */
 

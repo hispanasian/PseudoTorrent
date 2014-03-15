@@ -210,7 +210,7 @@ public class Host
 	}
 		
 	/**
-	 * Sets host as being interested in the peer.
+	 * Returns if host is interested in the peer.
 	 * 
 	 * @param peerID	the peer id of the peer
 	 * 

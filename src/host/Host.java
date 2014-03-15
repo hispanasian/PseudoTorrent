@@ -34,7 +34,7 @@ public class Host
 	
 	protected static Hashtable<Integer, HostEntry> lookup;
 	
-	protected static int numPieces;
+	public static int numPieces;
 	protected static int numPrefNeighbors;
 	protected static int unchokeInterval;
 	protected static int optimisticUnchokeInterval;	
@@ -101,17 +101,6 @@ public class Host
 	}
 
 	/**
-	 * Updates the host's bitfield with the received piece.
-	 * 
-	 * @param peerID	the peer id of the peer
-	 * @param piece		the piece that needs to be updated in the bitfield
-	 * 
-	 */
- 	public static synchronized void updateHostBitfield (int piece) {
-		Host.bitfield.set(piece);
-	}
- 	
-	/**
 	 * Returns the host's bitfield
 	 * 
 	 */	
@@ -161,7 +150,7 @@ public class Host
 	 */
 	public static synchronized void add(int peerID, final TorrentSocket socket)
 	{
-		Host.lookup.put(peerID, new HostEntry(socket));
+		Host.lookup.put(peerID, new HostEntry(socket, numPieces));
 	}
 	
 	/**
@@ -302,7 +291,7 @@ public class Host
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public ArrayList<TorrentSocket> getSocketList () {
+	public static ArrayList<TorrentSocket> getSocketList () {
 		ArrayList<TorrentSocket> result = new ArrayList <TorrentSocket>();
 		
 		Iterator<Entry<Integer, HostEntry>> it = Host.lookup.entrySet().iterator();
@@ -314,42 +303,84 @@ public class Host
 		return result;
 	}
 	
-	
-	
-	
-	
 	/**
 	 * Updates the bitfield record for the host using the piece info.
 	 * 
 	 * @param chunkID	the chunk id of the piece sent by the peer
-	 * @param peerID	the peer id of the computer that is sending the pieced
+	 * @param peerID	the peer id of the peer that is sending the piece
 	 * 
 	 */
 	public static synchronized void updatePiece (int chunkID, int peerID) {
-		//TODO: make bitfield for host and set to 0 at start then to 1 as chunkIDs come in
-		//add 1 to counter for that peerID to be used in determining topK
+		Host.bitfield.set(chunkID);
+		Host.lookup.get(peerID).bitsReceived += 1;
 	}
 
-
+	/**
+	 * Returns whether or not this host believes everyone, including itself has the file.
+	 * 
+	 */
+	public static synchronized boolean everyoneHasFile() 
+	{		
+		boolean result = true;
+		
+		if (bitfield.cardinality() == bitfield.size()) {
+			result = false;
+		}
+		else {
+			Iterator<Entry<Integer, HostEntry>> it = Host.lookup.entrySet().iterator();
+	        while (it.hasNext()) {
+	        	Map.Entry<Integer, HostEntry> entry = (Map.Entry<Integer, HostEntry>)it.next();
+	        	BitSet toTest = entry.getValue().bitfield;
+	        	if (toTest.cardinality() != toTest.size()) {
+	        		result = false;
+	        		break;
+	        	}
+	        }
+		}			
+		return result;
+	}
 	
 
 	
-	//TODO:
-	public static int getRandomChunkID(int peerID) {
-		return 1;
+	/**
+	 * Returns the integer chunkID of the chunk that is being requested by the host
+	 * from the peer identified by peerID.
+	 * 
+	 * @param peerID	the peer id of the peer that is sending the piece
+	 * 
+	 */
+	public static synchronized int getRandomChunkID(int peerID) {
 		//get random piece from among those the peer has that host dosn't have
+		//TODO: modify random to ignore previous random #'s until unset.
+		
+		//do this by keepign another bitset and setting those bits if the piece is outstanding /requested,
+		//unset the bit and modify original if 
+		
+		BitSet hostBitfield = bitfield;
+		BitSet peerBitfield = lookup.get(peerID).bitfield;
+		BitSet randomBitfield = lookup.get(peerID).randBitfield;
+		
+		hostBitfield.flip(0, bitfield.size());
+		randomBitfield.flip(0,randomBitfield.size());
+		
+		
+		boolean stop = false;
+		int result = -1;
+		while (!stop) {
+		      Random randomNum = new Random();
+		      int index = randomNum.nextInt(bitfield.size());
+		      if (bitfield.get(index) == true) {
+		    	  stop = true;
+		    	  result = index;
+		    	  //set other bitset to true at index
+		      }
+		}
+		return result;		
 	}
 	
-
-
-	//TODO:
-	public static synchronized boolean everyoneHasFile() {
-		return false;
+	public static synchronized void unsetRandomChunk(int chunkID) {
+		
 	}
- 	
- 	public static synchronized void setPeerBitfield(int peerID, BitSet bitfield) {
- 		Host.lookup.get(peerID).bitfield = bitfield;
- 	}
 	
 	//TODO:
 	private static synchronized void updateFileCompletion () {
@@ -405,10 +436,11 @@ public class Host
 	}
 	
 	private static synchronized BitSet compare(BitSet peer, BitSet host) {
-		host.flip(0, host.size());
-		host.and(peer);
-		return peer;
-		
+		BitSet host1 = host;
+		BitSet peer1 = peer;
+		host1.flip(0, host1.size());
+		host1.and(peer1);
+		return peer1;	
 	}
 	
 	/**
@@ -452,8 +484,6 @@ public class Host
 		return hasFile;
 		
 	}
-	
-
 	
 	/**
 	 * Returns the number of bits recieved from the peer associated with the peerID

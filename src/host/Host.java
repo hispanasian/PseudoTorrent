@@ -74,11 +74,11 @@ public class Host
 		Host.hostID = -1;
 	} /* end Constructor */
 	
-	public int getID (){
+	public static int getID (){
 		return Host.hostID;
 	}
 	
-	public void setHostID (int intID) {
+	public static void setHostID (int intID) {
 		Host.hostID = intID; 
 	}
 	
@@ -133,12 +133,12 @@ public class Host
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */	
-	public synchronized boolean peerIsChoked (int peerID) {
+	public static synchronized boolean peerIsChoked (int peerID) {
 		if (Host.lookup.isEmpty()) {return true;} //TODO: do I need this?
 		return Host.lookup.get(peerID).choked;
 	}
 	
-	public synchronized void chokedBy (int peerID) {
+	public static synchronized void chokedBy (int peerID) {
 		Host.lookup.get(peerID).choking = true;
 	}
 	
@@ -148,7 +148,7 @@ public class Host
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public synchronized boolean peerIsChoking (int peerID) 
+	public static synchronized boolean peerIsChoking (int peerID) 
 	{
 		return Host.lookup.get(peerID).choking;
 	}

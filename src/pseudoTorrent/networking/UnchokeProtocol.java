@@ -33,7 +33,7 @@ public class UnchokeProtocol extends Protocol
 				if(((TorrentSocket) protocols.getSocket()).request == null)
 				{
 					int chunk = Host.getRandomChunkID(peerID);
-					Message req = new Message(Message.Type.REQUESET, chunk);
+					Message req = new Message(Message.Type.REQUEST, chunk);
 					try 
 					{
 						protocols.process(req, Protocol.Stance.SENDING);

@@ -29,9 +29,9 @@ public class Host
 {
 	
 	/******************* Class Attributes *******************/
-	public static int hostID;
+	protected static int hostID;
 	
-	public static Hashtable<Integer, HostEntry> lookup;
+	protected static Hashtable<Integer, HostEntry> lookup;
 	
 	protected static int numPieces;
 	protected static int numPrefNeighbors;
@@ -40,8 +40,8 @@ public class Host
 	protected static ArrayList <PeerRankEntry> AllRank;
 	protected static ArrayList <PeerRankEntry> Choked;
 	
-	public static ArrayList <Integer>  UnchokedTopK;
-	public static int optimisticUnchokedPeer;
+	protected static ArrayList <Integer>  UnchokedTopK;
+	protected static int optimisticUnchokedPeer;
 	
 	protected static BitSet bitfield;
 	
@@ -74,7 +74,7 @@ public class Host
 		Host.hostID = -1;
 	} /* end Constructor */
 	
-	public int getID (){
+	public static int getID (){
 		return Host.hostID;
 	}
 	
@@ -133,12 +133,12 @@ public class Host
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */	
-	public synchronized boolean peerIsChoked (int peerID) {
+	public static synchronized boolean peerIsChoked (int peerID) {
 		if (Host.lookup.isEmpty()) {return true;} //TODO: do I need this?
 		return Host.lookup.get(peerID).choked;
 	}
 	
-	public synchronized void chokedBy (int peerID) {
+	public static synchronized void chokedBy (int peerID) {
 		Host.lookup.get(peerID).choking = true;
 	}
 	
@@ -148,7 +148,7 @@ public class Host
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public synchronized boolean peerIsChoking (int peerID) 
+	public static synchronized boolean peerIsChoking (int peerID) 
 	{
 		return Host.lookup.get(peerID).choking;
 	}
@@ -215,6 +215,19 @@ public class Host
 	public int getRandomChunkID() {
 		return 1;
 	}
+	
+	/**
+	 * Updates the bitfield record for the host using the piece information.
+	 * 
+	 * @param peerID	the peer id of the peer
+	 * @param piece		the piece that needs to be updated in the bitfield
+	 * 
+	 */
+ 	public static synchronized void updateHostBitfield (int piece) {
+		Host.bitfield.set(piece);
+	}
+	
+	
 
 	//TODO:
 	private static synchronized void updateFileCompletion () {
@@ -311,27 +324,7 @@ public class Host
 		
 	}
 	
-	/**
-	 * Updates the bitfield record for the host using the piece information.
-	 * 
-	 * @param peerID	the peer id of the peer
-	 * @param piece		the piece that needs to be updated in the bitfield
-	 * 
-	 */
- 	private static synchronized void updateHostBitfield (int piece) {
-		Host.bitfield.set(piece);
-	}
-	
-	/**
-	 * Returns the bitfield of the give peer.
-	 * 
-	 * @param peerID	the peer id of the peer
-	 * 
-	 */
-	private static synchronized BitSet getBitfield (int peerID) 
-	{
-		return Host.lookup.get(peerID).bitfield;
-	}
+
 	
 	/**
 	 * Returns the number of bits recieved from the peer associated with the peerID

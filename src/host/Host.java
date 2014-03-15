@@ -78,7 +78,7 @@ public class Host
 		return Host.hostID;
 	}
 	
-	public void setHostID (int intID) {
+	public static void setHostID (int intID) {
 		Host.hostID = intID; 
 	}
 	

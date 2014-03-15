@@ -20,7 +20,6 @@ public class HaveProtocol extends Protocol
 	@Override
 	public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
 		//this wont have any lines 
 		
 		
@@ -29,7 +28,6 @@ public class HaveProtocol extends Protocol
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
 		//i will update bitfield of of sender
 		int senderId= ((TorrentSocket)protocols.getSocket()).getPeerID();
 		 int chunkID= (((Message)message).payloadToInt());

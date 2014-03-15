@@ -17,7 +17,7 @@ public class InterestedProtocol extends Protocol
 	@Override
 	public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// To nothing
+		// Do nothing
 		
 	} /* end sendProtocol method */
 

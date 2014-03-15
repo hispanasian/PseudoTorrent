@@ -74,6 +74,7 @@ public class Host
 		Host.AllRank = new ArrayList <PeerRankEntry> ();
 		Host.optimisticUnchokedPeer = -1;
 		Host.hostID = -1;
+		Host.bitfield = new BitSet(numPieces);
 		try {
 			Host.log = new TorrentLogger(hostID, logPath);
 		} catch (IOException e) {
@@ -82,37 +83,43 @@ public class Host
 		}
 	} /* end Constructor */
 	
+	/**
+	 * Returns the host's ID
+	 * 
+	 */
 	public static int getID (){
 		return Host.hostID;
 	}
 	
-	public static void setHostID (int intID) {
-		Host.hostID = intID; 
-	}
-	
-	//TODO:
-	public static synchronized boolean everyoneHasFile() {
-		return false;
-	}
-
-	//TODO: should we update after every add?  should the type socket be changed?  Torrent Socket!
 	/**
-	 * Allows the user to add a peer and associated socket to the lookup map.  This should be invoked at
-	 * the start of main as threads are being spun up.  
+	 * Allows the host's ID to be set.  This should only be called once at the start of PeerProcess.
 	 * 
-	 * @param peerID	the peer id of the connected peer
-	 * @param socket	the socket the peer is using
+	 * @param hostID	the host id of the process
 	 * 
 	 */
-	public static synchronized void add(int peerID, final TorrentSocket socket)
-	{
-		/* Map the peerID to tracker entry */
-		System.out.println("HERE");
-		Host.lookup.put(peerID, new HostEntry(socket));
-		//Tracker.updateTopK();
-		//Tracker.findOptimalNeighbor();
+	public static void setHostID (int hostID) {
+		Host.hostID = hostID; 
 	}
-	
+
+	/**
+	 * Updates the host's bitfield with the received piece.
+	 * 
+	 * @param peerID	the peer id of the peer
+	 * @param piece		the piece that needs to be updated in the bitfield
+	 * 
+	 */
+ 	public static synchronized void updateHostBitfield (int piece) {
+		Host.bitfield.set(piece);
+	}
+ 	
+	/**
+	 * Returns the host's bitfield
+	 * 
+	 */	
+	public static synchronized BitSet getHostBitfield() {
+		return Host.bitfield;
+	}
+
 	/**
 	 * Chokes the peer associated with peerID.
 	 * 
@@ -134,7 +141,60 @@ public class Host
 	{
 		Host.lookup.get(peerID).choked = false;
 	}
+		
+	/**
+	 * Allows the user to add a peer and associated socket to the lookup map.  
+	 * 
+	 * @param peerID	the peer id of the connected peer
+	 * @param socket	the socket the peer is using
+	 * 
+	 */
+	public static synchronized void add(int peerID, final TorrentSocket socket)
+	{
+		Host.lookup.put(peerID, new HostEntry(socket));
+	}
 	
+	/**
+	 * Allows the host to set its bitfield to either having the file (all 1s/true)
+	 * or not having the file (all 0s/false)  
+	 * 
+	 * @param hasFile	the value 1 represents the host has the file, 0 otherwise
+	 * 
+	 */
+	public static void setFile(int hasFile) {
+		if (hasFile == 1) {
+			Host.bitfield.clear();
+			Host.bitfield.flip(0, Host.numPieces);
+		}
+		else {
+			//TODO: error
+		}
+	}
+
+	/**
+	 * Updates the bitfield record for a given peer using the piece info.
+	 * 
+	 * @param peerID	the peer id of the peer
+	 * @param piece		the piece that needs to be updated in the bitfield
+	 * 
+	 */
+	public static synchronized void updatePeerBitfield (int peerID, int chunkID) 
+	{
+		Host.lookup.get(peerID).bitfield.set(chunkID);
+		//TODO:determine if host are interested still or not in all peers
+	}
+	
+	public static synchronized void updatePeerBitfield (int peerID, BitSet bitfield) {
+		
+		Host.lookup.get(peerID).bitfield = bitfield;
+		//TODO: determine if the peer has bits we are interested in
+	}
+	
+	
+	public static void updatePeerBitfield () {
+		
+	}
+
 	/**
 	 * Returns if the peer associated with the peerID is choked or not
 	 * 
@@ -159,20 +219,6 @@ public class Host
 	public static synchronized boolean peerIsChoking (int peerID) 
 	{
 		return Host.lookup.get(peerID).choking;
-	}
-	
-	/**
-	 * Updates the bitfield record for a given peer using the piece info.
-	 * 
-	 * @param peerID	the peer id of the peer
-	 * @param piece		the piece that needs to be updated in the bitfield
-	 * 
-	 */
-	public static synchronized void updatePeerBitfield (int peerID, int chunkID) 
-	{
-		Host.lookup.get(peerID).bitfield.set(chunkID);
-		//TODO:determine if host are interested still or not in all peers
-		//send message to the peer to notify if not interested.
 	}
 	
 	/**
@@ -208,41 +254,32 @@ public class Host
 	{
 		Host.lookup.get(peerID).peerInterested = false;
 	}
-		
+	
 	/**
-	 * Sets host as being interested in the peer.
+	 * Returns whether or not the host is interested in the peer pieces.
 	 * 
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public static synchronized void isInterested (int peerID) {
-		Host.lookup.get(peerID).hostInterested = true;
+	public static synchronized boolean isInterested (int peerID) {
+		return Host.lookup.get(peerID).hostInterested;
 	}
 	
 	//TODO:
-	public int getRandomChunkID() {
+	public int getRandomChunkID(int peerID) {
 		return 1;
+		//get random piece from among those the peer has that host dosn't have
 	}
-	
-	/**
-	 * Updates the bitfield record for the host using the piece information.
-	 * 
-	 * @param peerID	the peer id of the peer
-	 * @param piece		the piece that needs to be updated in the bitfield
-	 * 
-	 */
- 	public static synchronized void updateHostBitfield (int piece) {
-		Host.bitfield.set(piece);
+
+	//TODO:
+	public static synchronized boolean everyoneHasFile() {
+		return false;
 	}
  	
  	public static synchronized void setPeerBitfield(int peerID, BitSet bitfield) {
  		Host.lookup.get(peerID).bitfield = bitfield;
  	}
 	
-	public static synchronized BitSet getHostBitfield() {
-		return Host.bitfield;
-	}
-
 	//TODO:
 	private static synchronized void updateFileCompletion () {
 		
@@ -375,7 +412,7 @@ public class Host
 	}
 	
 	/**
-	 * Returns whether or not the host is interested in the peer pieces.
+	 * Sets host as being interested in the peer.
 	 * 
 	 * @param peerID	the peer id of the peer
 	 * 

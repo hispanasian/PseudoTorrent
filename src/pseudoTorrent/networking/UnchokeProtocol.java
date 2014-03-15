@@ -28,16 +28,28 @@ public class UnchokeProtocol extends Protocol
 		Host.unchokedBy(peerID);
 		if(Host.isInterested(peerID))
 		{
-			int chunk = Host.getRandomChunkID(peerID);
-			Message req = new Message(Message.Type.REQUESET, chunk);
-			try 
+			/* Only send a request if we have not sent a request before. If we
+			 * have sent a request, do not request a new piece. Furthermore, we
+			 * must synchronize on the socket to atomically check and set the
+			 * request. */
+			synchronized(((TorrentSocket) protocols.getSocket()))
 			{
-				protocols.process(req, Protocol.Stance.SENDING);
-			} /* end try */
-			catch (Exception e) 
-			{
-				// TODO determine what to do
-			} /* end catch */
+				if(((TorrentSocket) protocols.getSocket()).request == null)
+				{
+					int chunk = Host.getRandomChunkID(peerID);
+					Message req = new Message(Message.Type.REQUESET, chunk);
+					try 
+					{
+						protocols.process(req, Protocol.Stance.SENDING);
+					} /* end try */
+					catch (Exception e) 
+					{
+						// TODO determine what to do
+					} /* end catch */
+					
+				} /* end if */
+				
+			} /* end synchronized method */
 			
 		} /* end if */
 		

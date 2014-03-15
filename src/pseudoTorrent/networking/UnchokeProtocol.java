@@ -29,11 +29,7 @@ public class UnchokeProtocol extends Protocol
 		if(Host.isInterested(peerID))
 		{
 			/* Only send a request if we have not sent a request before. If we
-			 * have sent a request, do not request a new piece. Furthermore, we
-			 * must synchronize on the socket to atomically check and set the
-			 * request. */
-			synchronized(((TorrentSocket) protocols.getSocket()).LOCK)
-			{
+			 * have sent a request, do not request a new piece. */
 				if(((TorrentSocket) protocols.getSocket()).request == null)
 				{
 					int chunk = Host.getRandomChunkID(peerID);
@@ -48,8 +44,6 @@ public class UnchokeProtocol extends Protocol
 					} /* end catch */
 					
 				} /* end if */
-				
-			} /* end synchronized method */
 			
 		} /* end if */
 		

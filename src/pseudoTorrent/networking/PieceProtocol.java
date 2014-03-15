@@ -33,14 +33,11 @@ public class PieceProtocol extends Protocol
 		Message chunk = (Message) message;
 		
 		/* Only update piece and host if the request is not null */
-		synchronized(((TorrentSocket) protocols.getSocket()).LOCK)
+		if(((TorrentSocket) protocols.getSocket()).request != null)
 		{
-			if(((TorrentSocket) protocols.getSocket()).request != null)
-			{
-				Host.file.giveChunk(chunkID, chunk.payload);
-				Host.updatePiece(chunkID, peerID);
-			} /* end if */
-		} /* end synchronized block */
+			Host.file.giveChunk(chunkID, chunk.payload);
+			Host.updatePiece(chunkID, peerID);
+		} /* end if */
 		
 		/* Send Have to peers */
 		Message have = new Message(Message.Type.HAVE, chunkID);
@@ -63,18 +60,14 @@ public class PieceProtocol extends Protocol
 		if(Host.isInterested(peerID))
 		{
 			/* Only send a request if we have not sent a request before. If we
-			 * have sent a request, do not request a new piece. Furthermore, we
-			 * must synchronize on the socket to atomically check and set the
-			 * request. */
-			synchronized(((TorrentSocket) protocols.getSocket()).LOCK)
+			 * have sent a request, do not request a new piece. */
+			if(((TorrentSocket) protocols.getSocket()).request == null)
 			{
-				if(((TorrentSocket) protocols.getSocket()).request == null)
-				{
-					chunkID = Host.getRandomChunkID(peerID);
-					((TorrentSocket) protocols.getSocket()).request = chunkID;
-					nextMessage = new Message(Message.Type.REQUESET, chunkID);
-				} /* end if */
-			} /* end synchronized method */
+				chunkID = Host.getRandomChunkID(peerID);
+				((TorrentSocket) protocols.getSocket()).request = chunkID;
+				nextMessage = new Message(Message.Type.REQUESET, chunkID);
+			} /* end if */
+				
 		} /* end if */
 		else nextMessage = new Message(Message.Type.NOT_INTERESTED);
 		

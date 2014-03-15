@@ -67,9 +67,8 @@ public class PeerProcess
 			tokens = new StringTokenizer (br.readLine());
 			tokens.nextToken();
 			pieceSize = Integer.parseInt(tokens.nextToken());
-			
-			
-			Host.setup(numPrefNeighbors, unchokeInterval, optimisticUnchokeInterval, fileSize, pieceSize);
+			String logPath = "";
+			Host.setup(numPrefNeighbors, unchokeInterval, optimisticUnchokeInterval, fileSize, pieceSize, logPath);
 			
 		} 
 		catch (IOException e) {

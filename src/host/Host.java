@@ -227,7 +227,9 @@ public class Host
 		Host.bitfield.set(piece);
 	}
 	
-	
+	public static synchronized BitSet getHostBitfield() {
+		return Host.bitfield;
+	}
 
 	//TODO:
 	private static synchronized void updateFileCompletion () {

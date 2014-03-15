@@ -67,7 +67,7 @@ public class TorrentSocket extends ProtocolSocket
 			else
 			{
 				/* Correct handshake, continue */
-				Message bitfield = new Message(Message.Type.BITFIELD, Host.);
+				Message bitfield = new Message(Message.Type.BITFIELD, Host.getHostBitfield());
 				this.definedSendMessage(bitfield);
 			} /* end else */
 			
@@ -190,7 +190,7 @@ public class TorrentSocket extends ProtocolSocket
 		} /* end for loop */
 		
 		/* Make last bytes, the peer ID */
-		byte[] peerID = Message.intToBytes(Host.hostID);
+		byte[] peerID = Message.intToBytes(Host.getID());
 		
 		handshake[28] = peerID[0];
 		handshake[29] = peerID[1];

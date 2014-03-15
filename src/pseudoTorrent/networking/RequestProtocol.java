@@ -24,6 +24,9 @@ public class RequestProtocol extends Protocol
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
+		//If will get the requested chunkID and peerID.
+		//if its chocked ignore the message else send piece message of that request
+
 		/* Check if interested. If so, send the requested chunk */
 		if(Host.isInterested(((TorrentSocket) protocols.getSocket()).getPeerID()));
 		{

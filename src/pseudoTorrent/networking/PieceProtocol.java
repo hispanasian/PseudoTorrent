@@ -32,9 +32,12 @@ public class PieceProtocol extends Protocol
 		int chunkID = ((TorrentSocket) protocols.getSocket()).request;
 		Message chunk = (Message) message;
 		
-		/* Store chunk and update host */
-		Host.file.giveChunk(chunkID, chunk.payload);
-		Host.updatePiece(chunkID, peerID);
+		/* Only update piece and host if the request is not null */
+		if(((TorrentSocket) protocols.getSocket()).request != null)
+		{
+			Host.file.giveChunk(chunkID, chunk.payload);
+			Host.updatePiece(chunkID, peerID);
+		} /* end if */
 		
 		/* Send Have to peers */
 		Message have = new Message(Message.Type.HAVE, chunkID);
@@ -57,18 +60,14 @@ public class PieceProtocol extends Protocol
 		if(Host.isInterested(peerID))
 		{
 			/* Only send a request if we have not sent a request before. If we
-			 * have sent a request, do not request a new piece. Furthermore, we
-			 * must synchronize on the socket to atomically check and set the
-			 * request. */
-			synchronized(((TorrentSocket) protocols.getSocket()))
+			 * have sent a request, do not request a new piece. */
+			if(((TorrentSocket) protocols.getSocket()).request == null)
 			{
-				if(((TorrentSocket) protocols.getSocket()).request == null)
-				{
-					chunkID = Host.getRandomChunkID(peerID);
-					((TorrentSocket) protocols.getSocket()).request = chunkID;
-					nextMessage = new Message(Message.Type.REQUESET, chunkID);
-				} /* end if */
-			} /* end synchronized method */
+				chunkID = Host.getRandomChunkID(peerID);
+				((TorrentSocket) protocols.getSocket()).request = chunkID;
+				nextMessage = new Message(Message.Type.REQUESET, chunkID);
+			} /* end if */
+				
 		} /* end if */
 		else nextMessage = new Message(Message.Type.NOT_INTERESTED);
 		
@@ -82,6 +81,14 @@ public class PieceProtocol extends Protocol
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} /* end catch */
+		
+		/* If done, log the completion of the file */
+		int chunksObtained = Host.getHostBitfield().cardinality();
+		if(chunksObtained >= Host.numPieces)
+		{
+			/* File completed, log completion */
+			Host.log.logCompletion();
+		} /* end if */
 		
 	} /* end receiveProtocol method */
 

@@ -1,5 +1,6 @@
 package pseudoTorrent.networking;
 
+import host.Host;
 import networking.Protocol;
 import networking.ProtocolMessage;
 import networking.ProtocolPackage;
@@ -16,14 +17,31 @@ public class RequestProtocol extends Protocol
 	@Override
 	public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		// Do nothing
 		
 	} /* end sendProtocol method */
 
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		/* Check if interested. If so, send the requested chunk */
+		if(Host.isInterested(((TorrentSocket) protocols.getSocket()).getPeerID()));
+		{
+			Message req = (Message) message;
+			byte[] chunk = Host.file.getChunk(req.payloadToInt());
+			
+			Message piece = new Message(Message.Type.PIECE, chunk);
+			
+			try 
+			{
+				protocols.process(piece, Protocol.Stance.SENDING);
+			} /* end try */ 
+			catch (Exception e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} /* end catch */
+		} /* end if */
 		
 	} /* end receiveProtocol method */
 

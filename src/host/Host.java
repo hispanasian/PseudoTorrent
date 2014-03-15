@@ -78,7 +78,6 @@ public class Host
 		try {
 			Host.log = new TorrentLogger(hostID, logPath);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	} /* end Constructor */
@@ -206,8 +205,13 @@ public class Host
 		return Host.lookup.get(peerID).choked;
 	}
 	
-	public static synchronized void chokedBy (int peerID) {
+	public static synchronized void chokedBy (int peerID) 
+	{
 		Host.lookup.get(peerID).choking = true;
+	}
+	public static synchronized void unchokedBy (int peerID) 
+	{
+		Host.lookup.get(peerID).choking = false;
 	}
 	
 	/**
@@ -220,6 +224,14 @@ public class Host
 	{
 		return Host.lookup.get(peerID).choking;
 	}
+	
+	/**
+	 * Returns true/false for whether or not the peer associated with the peerID is choking the host.
+	 * 
+	 * @param peerID	the peer id of the peer
+	 * 
+	 */
+
 	
 	/**
 	 * Updates the bitfield record for the host using the piece info.

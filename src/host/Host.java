@@ -47,6 +47,7 @@ public class Host
 	protected static int optimisticUnchokedPeer;
 	
 	protected static BitSet bitfield;
+	protected static BitSet randBitfield;
 	public static TorrentLogger log;
 	public static ByteReadAndWrite file;
 	
@@ -78,6 +79,7 @@ public class Host
 		Host.optimisticUnchokedPeer = -1;
 		Host.hostID = -1;
 		Host.bitfield = new BitSet(numPieces);
+		Host.randBitfield = new BitSet(numPieces);
 		// TODO: Host.file initialize
 		
 		try {
@@ -318,6 +320,7 @@ public class Host
 	public static synchronized void updatePiece (int chunkID, int peerID) {
 		Host.bitfield.set(chunkID);
 		Host.lookup.get(peerID).bitsReceived += 1;
+		Host.randBitfield.set(chunkID);
 	}
 
 	/**
@@ -344,9 +347,7 @@ public class Host
 		}			
 		return result;
 	}
-	
-
-	
+		
 	/**
 	 * Returns the integer chunkID of the chunk that is being requested by the host
 	 * from the peer identified by peerID.
@@ -354,42 +355,43 @@ public class Host
 	 * @param peerID	the peer id of the peer that is sending the piece
 	 * 
 	 */
-	public static synchronized int getRandomChunkID(int peerID) {
-		//get random piece from among those the peer has that host dosn't have
-		//TODO: modify random to ignore previous random #'s until unset.
-		
-		//do this by keepign another bitset and setting those bits if the piece is outstanding /requested,
-		//unset the bit and modify original if 
-		
+	public static synchronized int getRandomChunkID(int peerID) 
+	{
+
 		BitSet hostBitfield = bitfield;
 		BitSet peerBitfield = lookup.get(peerID).bitfield;
-		BitSet randomBitfield = lookup.get(peerID).randBitfield;
+		BitSet randomBitfield = randBitfield;
 		
-		hostBitfield.flip(0, bitfield.size());
+		hostBitfield.flip(0, hostBitfield.size());
 		randomBitfield.flip(0,randomBitfield.size());
 		
+		hostBitfield.and(peerBitfield);
+		hostBitfield.and(randomBitfield);
 		
 		boolean stop = false;
 		int result = -1;
 		while (!stop) {
 		      Random randomNum = new Random();
-		      int index = randomNum.nextInt(bitfield.size());
-		      if (bitfield.get(index) == true) {
+		      int index = randomNum.nextInt(hostBitfield.size());
+		      if (hostBitfield.get(index) == true) {
 		    	  stop = true;
 		    	  result = index;
+		    	  randBitfield.set(index);
+		    	  break;
 		    	  //set other bitset to true at index
 		      }
 		}
 		return result;		
 	}
 	
+	/**
+	 * Allows the host to unset a bit in the random bitfield for use with getRandomChunk.
+	 * 
+	 * @param chunkID	the chunkID of the piece that should be unset in the random bitfield
+	 * 
+	 */
 	public static synchronized void unsetRandomChunk(int chunkID) {
-		
-	}
-	
-	//TODO:
-	private static synchronized void updateFileCompletion () {
-		
+		randBitfield.set(chunkID, false);
 	}
 	
 	/**
@@ -399,8 +401,6 @@ public class Host
 	 * purposes.
 	 * 
 	 */
-	//TODO: hasEveryoneRecieved file method?
-	//TODO: if I have the whole file unchoke everyone;
 	protected static synchronized void updateTopK () {
 		Host.AllRank.clear();
 		Host.UnchokedTopK.clear();
@@ -434,12 +434,93 @@ public class Host
         	entry.getValue().bitsReceived = 0;			//reset bitsRecieved
         }
         
-        //TODO: at this point the unchokedTopK and choked lists are done,
-        //so go through the lookup and if the unchoked value at the peer changes send a choke/unchoke message
-        //then update the lookup table acordingly updating who is choked and unchoked.
+        if (bitfield.cardinality() == bitfield.size()) {
+        	UnchokedTopK.clear();
+
+    		Iterator<Entry<Integer, HostEntry>> it3 = Host.lookup.entrySet().iterator();
+            while (it3.hasNext()) {
+            	Map.Entry<Integer, HostEntry> entry = (Map.Entry<Integer, HostEntry>)it3.next();
+            	UnchokedTopK.add(entry.getKey());
+            }
+        }
         
+        if (!UnchokedTopK.isEmpty()){
+            for (Integer peerID: UnchokedTopK) {
+            	
+            	if (Host.lookup.get(peerID).choked == true){
+            		Host.lookup.get(peerID).choked = false;
+            		Message m = new Message (Message.Type.UNCHOKE);
+            		try {
+    					Host.lookup.get(peerID).socket.sendMessage(m);
+    				} catch (InstantiationException e1) {
+    					// TODO Auto-generated catch block
+    					e1.printStackTrace();
+    				} catch (IllegalAccessException e1) {
+    					// TODO Auto-generated catch block
+    					e1.printStackTrace();
+    				}
+            	}
+            }
+        }
+
+        if (!Choked.isEmpty()) {
+            for (PeerRankEntry e: Choked) {
+            	if (Host.lookup.get(e.peerID).choked == false) {
+            		Host.lookup.get(e.peerID).choked = true;
+            		Message m = new Message (Message.Type.CHOKE);
+            		try {
+    					Host.lookup.get(e.peerID).socket.sendMessage(m);
+    				} catch (InstantiationException e1) {
+    					// TODO Auto-generated catch block
+    					e1.printStackTrace();
+    				} catch (IllegalAccessException e1) {
+    					// TODO Auto-generated catch block
+    					e1.printStackTrace();
+    				}
+            	}
+            }
+        }
+	}
+
+	/**
+	 * Determines the current optimistically unchoked peer for this m interval time frame.
+	 * This method should only be used by the associated OptUnchokeTask for timing purposes.
+	 * 
+	 */
+	protected static synchronized void findOptimisticPeer () {
+
+		if (!Host.Choked.isEmpty()) {
+			boolean stop = false;
+			while (!stop) {
+				Random randomGenerator = new Random();
+				int index = randomGenerator.nextInt(Host.Choked.size());
+				if (Host.Choked.get(index).isInterested) {
+			        Host.optimisticUnchokedPeer = Host.Choked.get(index).peerID;
+			        Message m = new Message (Message.Type.UNCHOKE);
+			        try {
+						Host.lookup.get(optimisticUnchokedPeer).socket.sendMessage(m);
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
+			        stop = true;
+				}
+			}
+		}
+		else {
+			Host.optimisticUnchokedPeer = -1;
+		}
 	}
 	
+	/**
+	 * Returns if he peer associated with the peerID has the complete file.
+	 * 
+	 * @param peerID	the peer id of the peer
+	 * 
+	 */
 	private static synchronized BitSet compare(BitSet peer, BitSet host) {
 		BitSet host1 = host;
 		BitSet peer1 = peer;
@@ -447,34 +528,7 @@ public class Host
 		host1.and(peer1);
 		return peer1;	
 	}
-	
-	/**
-	 * Returns the optimistically unchoked peerID for this m interval time frame.
-	 * Returns a -1 if there is no optimistically unchoked peer currently.
-	 * 
-	 */
-	private static synchronized int getOptimisticPeer () {
-		return Host.optimisticUnchokedPeer;
-	}
-	
-	/**
-	 * Determines the current optimistically unchoked peer for this m interval time frame.
-	 * This method should only be used by the associated OptUnchokeTask for timing purposes.
-	 * 
-	 */
-	protected static synchronized void findOptimisticPeer () {
-		Random randomGenerator = new Random();
-		
-		if (!Host.Choked.isEmpty()) {
-			int index = randomGenerator.nextInt(Host.Choked.size());
-	        Host.optimisticUnchokedPeer = Host.Choked.get(index).peerID;
-		}
-		else {
-			Host.optimisticUnchokedPeer = -1;
-		}
-		//send msgs that are needed to unchoke the optimistic guy
-	}
-	
+
 	/**
 	 * Returns if he peer associated with the peerID has the complete file.
 	 * 
@@ -502,19 +556,6 @@ public class Host
 	}
 	
 	/**
-	 * Adds some number of bits to the total number of bits recieved in the last time period 
-	 * from the peer associated with the peerID.  This is used in determining the download 
-	 * rate from the peers.
-	 * 
-	 * @param peerID	the peer id of the peer
-	 * @param numBits	the number of bits to add to this peer
-	 * 
-	 */
-	private static synchronized void addBytes (int peerID, int numBytes) {
-		Host.lookup.get(peerID).bitsReceived += numBytes;
-	}
-	
-	/**
 	 * Returns whether or not the peer is interested in the host pieces.
 	 * 
 	 * @param peerID	the peer id of the peer
@@ -534,4 +575,8 @@ public class Host
 		return Host.lookup.get(peerID).hostInterested;
 	}
 	
+	//TODO:
+	private static synchronized void updateFileCompletion () {
+		
+	}
 }

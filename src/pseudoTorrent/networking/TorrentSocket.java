@@ -1,16 +1,16 @@
 package pseudoTorrent.networking;
 
+import host.Host;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-
 import pseudoTorrent.PeerProcess;
 import networking.ProtocolMessage;
 import networking.ProtocolPackage;
 import networking.ProtocolSocket;
-
 
 /**
  * The TorrentSocket class will perform the socket functionality necessary for
@@ -45,7 +45,6 @@ public class TorrentSocket extends ProtocolSocket
 	@Override
 	public void initialProcess() 
 	{
-		// TODO Implement handshake here
 		/* Note that you must use the getPacket method here to get each byte
 		 * individually and similarly, use sendPacket to send each byte 
 		 * individually. If getMessage, sendMessage, definedGetMessage or 
@@ -53,13 +52,33 @@ public class TorrentSocket extends ProtocolSocket
 		 * according to spec (which the handshake does not follow).
 		 */
 		
-		//steps:
-		//make the tcp connection with the peerID.
-		//you have to use makeHandshake and sendHandshake
-		
-		
-		
-		
+		if(this.isSender)
+		{
+			/* Sender starts handshake */
+			this.sendHandshake();
+			Integer peer = this.getHandshake();
+			
+			/* Check handshake */
+			if(peer == null || this.peerID != peer)
+			{
+				/* Incorrect handshake, terminate */
+				this.terminate();
+			} /* end if */
+			else
+			{
+				/* Correct handshake, continue */
+				Message bitfield = new Message(Message.Type.BITFIELD, Host.getHostBitfield());
+				this.definedSendMessage(bitfield);
+			} /* end else */
+			
+		} /* end if */
+		else
+		{
+			/* Receiver receives first handshake */
+			this.peerID = this.getHandshake();
+			Host.add(this.peerID, this);
+			this.sendHandshake();
+		} /* end else */
 		
 	} /* end initialProcess */
 
@@ -171,7 +190,7 @@ public class TorrentSocket extends ProtocolSocket
 		} /* end for loop */
 		
 		/* Make last bytes, the peer ID */
-		byte[] peerID = Message.intToBytes(PeerProcess.getPeerID());
+		byte[] peerID = Message.intToBytes(Host.getID());
 		
 		handshake[28] = peerID[0];
 		handshake[29] = peerID[1];

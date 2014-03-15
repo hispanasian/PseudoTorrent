@@ -5,8 +5,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import networking.ProtocolPackage;
 
-
-
 /**
  * TorrentServer will act as the server for the PseudoTorrent. It will listen 
  * on a specified port and spawn TorrentSockets as necessary. 
@@ -37,7 +35,7 @@ public class TorrentServer implements Runnable
 				socket = null;
 				protocols = new ProtocolPackage();
 				socket = server.accept();
-				if(socket != null) new TorrentSocket(socket, protocols, true).start();
+				if(socket != null) new TorrentSocket(socket, protocols, false).start();
 			} /* end try */
 			catch (Exception e) 
 			{

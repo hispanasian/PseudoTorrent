@@ -1,5 +1,6 @@
 package pseudoTorrent.networking;
 
+import host.Host;
 import networking.Protocol;
 import networking.ProtocolMessage;
 import networking.ProtocolPackage;
@@ -16,14 +17,15 @@ public class NotInterestedProtocol extends Protocol
 	@Override
 	public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		// Do nothing
 		
 	} /* end sendProtocol method */
 
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		Host.peerIsNotInterested(((TorrentSocket) protocols.getSocket()).getPeerID());
+		Host.log.logReceivedNotInterested(((TorrentSocket) protocols.getSocket()).getPeerID());
 		
 	} /* end receiveProtocol method */
 

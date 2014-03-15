@@ -91,11 +91,6 @@ public class ProtocolSocketTest {
 			}
 		} /* end definedSendMessage */
 
-		@Override
-		public int getPeerID() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
 	} /* end TestSocket */
 
 	public static class TestServer implements Runnable {

@@ -1,5 +1,6 @@
 package pseudoTorrent.networking;
 
+import host.Host;
 import networking.Protocol;
 import networking.ProtocolMessage;
 import networking.ProtocolPackage;
@@ -16,14 +17,29 @@ public class UnchokeProtocol extends Protocol
 	@Override
 	public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		Host.log.logUnchoking(((TorrentSocket) protocols.getSocket()).getPeerID());
 		
 	} /* end sendProtocol method */
 
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		int peerID = ((TorrentSocket) protocols.getSocket()).getPeerID();
+		Host.unchokedBy(peerID);
+		if(Host.isInterested(peerID))
+		{
+			int chunk = Host.getRandomChunkID(peerID);
+			Message req = new Message(Message.Type.REQUESET, chunk);
+			try 
+			{
+				protocols.process(req, Protocol.Stance.SENDING);
+			} /* end try */
+			catch (Exception e) 
+			{
+				// TODO determine what to do
+			} /* end catch */
+			
+		} /* end if */
 		
 	} /* end receiveProtocol method */
 

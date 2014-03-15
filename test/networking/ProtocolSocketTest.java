@@ -90,6 +90,7 @@ public class ProtocolSocketTest {
 				e.printStackTrace();
 			}
 		} /* end definedSendMessage */
+
 	} /* end TestSocket */
 
 	public static class TestServer implements Runnable {

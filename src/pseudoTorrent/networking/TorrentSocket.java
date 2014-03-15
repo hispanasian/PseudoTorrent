@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import networking.Protocol;
 import networking.ProtocolMessage;
 import networking.ProtocolPackage;
 import networking.ProtocolSocket;
@@ -25,7 +26,7 @@ public class TorrentSocket extends ProtocolSocket
 	/******************* Class Attributes *******************/
 	public final boolean isSender;
 	private Integer peerID;
-	private int request;	/* the previously requested piece */
+	public Integer request;	/* the previously requested piece */
 	
 	/******************* Class Methods *******************/
 	public TorrentSocket(Integer peerID, final Socket socket, ProtocolPackage protocols, boolean isSender) throws SocketException, IOException
@@ -80,23 +81,38 @@ public class TorrentSocket extends ProtocolSocket
 			this.peerID = this.getHandshake();
 			this.sendHandshake();
 			Message bitfield = (Message) this.definedGetMessage();
+			Host.add(this.peerID, this);
 			
-			if(bitfield.type != Message.Type.BITFIELD)
+			if(bitfield.type == Message.Type.BITFIELD)
 			{
-				/* Incorrect message received */
-				this.terminate();
+				/* Process the bitfield message */
+				try 
+				{
+					this.protocols.process(bitfield, Protocol.Stance.RECEIVING);
+				} /* end try */
+				catch (Exception e) 
+				{
+					this.terminate();
+				} /* end catch */
 			} /* end if */
 			else
 			{
-				Host.add(this.peerID, this);
-				Host.setPeerBitfield(this.peerID, bitfield.payloadToBitSet());
+				this.terminate();
 			} /* end else */
+			
 		} /* end else */
 		
 		/* If there were no issues, log the connection */
-		if(this.done)
+		if(!this.done)
 		{
 			Host.log.logTCPConnection(this.peerID, isSender);
+			
+			/* Send bitfield if it is not empty */
+			if(!Host.getHostBitfield().isEmpty())
+			{
+				Message bitfield = new Message(Message.Type.BITFIELD, Host.getHostBitfield());
+				this.definedSendMessage(bitfield);
+			} /* end if */
 		} /* end if */
 		
 	} /* end initialProcess */

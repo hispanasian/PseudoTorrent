@@ -26,7 +26,7 @@ public class TorrentSocket extends ProtocolSocket
 	/******************* Class Attributes *******************/
 	public final boolean isSender;
 	private Integer peerID;
-	protected int request;	/* the previously requested piece */
+	public Integer request;	/* the previously requested piece */
 	
 	/******************* Class Methods *******************/
 	public TorrentSocket(Integer peerID, final Socket socket, ProtocolPackage protocols, boolean isSender) throws SocketException, IOException

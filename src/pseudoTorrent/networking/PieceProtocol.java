@@ -1,5 +1,7 @@
 package pseudoTorrent.networking;
 
+import java.util.ArrayList;
+
 import host.Host;
 import networking.Protocol;
 import networking.ProtocolMessage;
@@ -26,16 +28,55 @@ public class PieceProtocol extends Protocol
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
+		int peerID = ((TorrentSocket) protocols.getSocket()).getPeerID();
 		int chunkID = ((TorrentSocket) protocols.getSocket()).request;
 		Message chunk = (Message) message;
 		
 		/* Store chunk and update host */
 		Host.file.giveChunk(chunkID, chunk.payload);
-		Host.updateHostBitfield(chunkID);
+		Host.updatePiece(chunkID, peerID);
 		
 		/* Send Have to peers */
+		Message have = new Message(Message.Type.HAVE, chunkID);
+		ArrayList<TorrentSocket> peers = Host.getSocketList();
+		for(TorrentSocket peer : peers)
+		{
+			try 
+			{
+				peer.sendMessage(have);
+			} /* end try */ 
+			catch (Exception e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} /* end catch */ 
+		} /* end for loop */
 		
 		/* If interested, send request. Else, send not interested */
+		Message nextMessage = null;
+		if(Host.isInterested(peerID))
+		{
+			
+			if(((TorrentSocket) protocols.getSocket()).request == null)
+			{
+				chunkID = Host.getRandomChunkID(peerID);
+				((TorrentSocket) protocols.getSocket()).request = chunkID;
+				nextMessage = new Message(Message.Type.REQUESET, chunkID);
+			} /* end if */
+			
+		} /* end if */
+		else nextMessage = new Message(Message.Type.NOT_INTERESTED);
+		
+		/* Send the next message */
+		try 
+		{
+			protocols.process(nextMessage, Protocol.Stance.SENDING);
+		} /* end try */ 
+		catch (Exception e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} /* end catch */
 		
 	} /* end receiveProtocol method */
 

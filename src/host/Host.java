@@ -307,7 +307,7 @@ public class Host
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public ArrayList<TorrentSocket> getSocketList () {
+	public static ArrayList<TorrentSocket> getSocketList () {
 		ArrayList<TorrentSocket> result = new ArrayList <TorrentSocket>();
 		
 		Iterator<Entry<Integer, HostEntry>> it = Host.lookup.entrySet().iterator();

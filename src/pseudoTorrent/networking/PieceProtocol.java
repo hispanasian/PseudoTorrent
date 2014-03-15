@@ -32,9 +32,15 @@ public class PieceProtocol extends Protocol
 		int chunkID = ((TorrentSocket) protocols.getSocket()).request;
 		Message chunk = (Message) message;
 		
-		/* Store chunk and update host */
-		Host.file.giveChunk(chunkID, chunk.payload);
-		Host.updatePiece(chunkID, peerID);
+		/* Only update piece and host if the request is not null */
+		synchronized(((TorrentSocket) protocols.getSocket()).LOCK)
+		{
+			if(((TorrentSocket) protocols.getSocket()).request != null)
+			{
+				Host.file.giveChunk(chunkID, chunk.payload);
+				Host.updatePiece(chunkID, peerID);
+			} /* end if */
+		} /* end synchronized block */
 		
 		/* Send Have to peers */
 		Message have = new Message(Message.Type.HAVE, chunkID);
@@ -60,7 +66,7 @@ public class PieceProtocol extends Protocol
 			 * have sent a request, do not request a new piece. Furthermore, we
 			 * must synchronize on the socket to atomically check and set the
 			 * request. */
-			synchronized(((TorrentSocket) protocols.getSocket()))
+			synchronized(((TorrentSocket) protocols.getSocket()).LOCK)
 			{
 				if(((TorrentSocket) protocols.getSocket()).request == null)
 				{

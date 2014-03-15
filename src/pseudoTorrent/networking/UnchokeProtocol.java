@@ -32,7 +32,7 @@ public class UnchokeProtocol extends Protocol
 			 * have sent a request, do not request a new piece. Furthermore, we
 			 * must synchronize on the socket to atomically check and set the
 			 * request. */
-			synchronized(((TorrentSocket) protocols.getSocket()))
+			synchronized(((TorrentSocket) protocols.getSocket()).LOCK)
 			{
 				if(((TorrentSocket) protocols.getSocket()).request == null)
 				{

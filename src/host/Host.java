@@ -210,13 +210,13 @@ public class Host
 	}
 		
 	/**
-	 * Returns if host is interested in the peer.
+	 * Sets host as being interested in the peer.
 	 * 
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public static synchronized boolean isInterested (int peerID) {
-		return Host.lookup.get(peerID).hostInterested;
+	public static synchronized void isInterested (int peerID) {
+		Host.lookup.get(peerID).hostInterested = true;
 	}
 	
 	//TODO:

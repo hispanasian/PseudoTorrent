@@ -37,6 +37,7 @@ public class HaveProtocol extends Protocol
 		//then if i am interested in this piece then I will send Interested message else not interested
 		if(Host.isInterested(senderId))
 		{
+			
 			 Message msg= new Message(Message.Type.INTERESTED);
 			 try {
 				protocols.process(msg, Protocol.Stance.SENDING);

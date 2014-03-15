@@ -26,6 +26,14 @@ public class ChokeProtocol extends Protocol
 	{
 		Host.chokedBy(((TorrentSocket) protocols.getSocket()).getPeerID());
 		
+		/* Tell the host and the TorrentSocket that we are no longer expecting
+		 * the request (if it is not null) */
+		if(((TorrentSocket) protocols.getSocket()).request == null)
+		{
+			Host.unsetRandomChunk(((TorrentSocket) protocols.getSocket()).request);
+			((TorrentSocket) protocols.getSocket()).request = null;
+		} /* end if */
+		
 	} /* end receiveProtocol method */
 
 } /* end ChokeProtocol class */

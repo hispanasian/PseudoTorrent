@@ -23,7 +23,9 @@ public class RequestProtocol extends Protocol
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		//If will get the requested chunkID and peerID.
+		//if its chocked ignore the message else send piece message of that request
+		
 		
 	} /* end receiveProtocol method */
 

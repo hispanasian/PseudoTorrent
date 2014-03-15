@@ -37,12 +37,28 @@ public class BitfieldProtocol extends Protocol
 		 if(interest)
 		 {
 			 Message msg= new Message(Message.Type.INTERESTED);
-			protocols.getSocket().protocolSendMessage(msg);
+			 try {
+					protocols.process(msg, Protocol.Stance.SENDING);
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		 }
 		 else
 		 {
 			 Message msg= new Message(Message.Type.NOT_INTERESTED);
-			 protocols.getSocket().protocolSendMessage(msg);
+			 try {
+					protocols.process(msg, Protocol.Stance.SENDING);
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		 }
 		// TODO Auto-generated method stub
 		

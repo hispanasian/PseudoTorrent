@@ -1,5 +1,6 @@
 package host;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -8,7 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-
+import pseudoTorrent.TorrentLogger;
 import pseudoTorrent.networking.*;
 
 
@@ -44,6 +45,7 @@ public class Host
 	protected static int optimisticUnchokedPeer;
 	
 	protected static BitSet bitfield;
+	public static TorrentLogger log;
 	
 	/******************* Class Methods *******************/
 	
@@ -59,7 +61,7 @@ public class Host
 	 * @param pieceSize						the piece size as specified in Common.cfg
 	 * 
 	 */
-	public static synchronized void setup (int numPrefNeighbors, int unchokeInterval, int optimisticUnchokeInterval, int fileSize, int pieceSize)
+	public static synchronized void setup (int numPrefNeighbors, int unchokeInterval, int optimisticUnchokeInterval, int fileSize, int pieceSize, String logPath)
 	{
 		Host.lookup = new Hashtable<Integer, HostEntry>();
 		Host.numPieces = fileSize / pieceSize;
@@ -72,6 +74,12 @@ public class Host
 		Host.AllRank = new ArrayList <PeerRankEntry> ();
 		Host.optimisticUnchokedPeer = -1;
 		Host.hostID = -1;
+		try {
+			Host.log = new TorrentLogger(hostID, logPath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	} /* end Constructor */
 	
 	/**
@@ -241,6 +249,10 @@ public class Host
 	public static synchronized boolean everyoneHasFile() {
 		return false;
 	}
+ 	
+ 	public static synchronized void setPeerBitfield(int peerID, BitSet bitfield) {
+ 		Host.lookup.get(peerID).bitfield = bitfield;
+ 	}
 	
 	//TODO:
 	private static synchronized void updateFileCompletion () {

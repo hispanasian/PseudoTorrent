@@ -7,6 +7,7 @@ package networking;
  * getting messages. If a Protocol were to use another socket (a socket that is
  * not the same as the socket that called the Protocol) then it should use the
  * SocketInterface.
+ * 
  * @author Carlos Vasquez
  *
  */

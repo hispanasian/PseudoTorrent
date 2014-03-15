@@ -56,14 +56,19 @@ public class PieceProtocol extends Protocol
 		Message nextMessage = null;
 		if(Host.isInterested(peerID))
 		{
-			
-			if(((TorrentSocket) protocols.getSocket()).request == null)
+			/* Only send a request if we have not sent a request before. If we
+			 * have sent a request, do not request a new piece. Furthermore, we
+			 * must synchronize on the socket to atomically check and set the
+			 * request. */
+			synchronized(((TorrentSocket) protocols.getSocket()))
 			{
-				chunkID = Host.getRandomChunkID(peerID);
-				((TorrentSocket) protocols.getSocket()).request = chunkID;
-				nextMessage = new Message(Message.Type.REQUESET, chunkID);
-			} /* end if */
-			
+				if(((TorrentSocket) protocols.getSocket()).request == null)
+				{
+					chunkID = Host.getRandomChunkID(peerID);
+					((TorrentSocket) protocols.getSocket()).request = chunkID;
+					nextMessage = new Message(Message.Type.REQUESET, chunkID);
+				} /* end if */
+			} /* end synchronized method */
 		} /* end if */
 		else nextMessage = new Message(Message.Type.NOT_INTERESTED);
 		

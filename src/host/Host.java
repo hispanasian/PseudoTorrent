@@ -254,15 +254,15 @@ public class Host
 	{
 		Host.lookup.get(peerID).peerInterested = false;
 	}
-		
+	
 	/**
-	 * Sets host as being interested in the peer.
+	 * Returns whether or not the host is interested in the peer pieces.
 	 * 
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	public static synchronized void isInterested (int peerID) {
-		Host.lookup.get(peerID).hostInterested = true;
+	public static synchronized boolean isInterested (int peerID) {
+		return Host.lookup.get(peerID).hostInterested;
 	}
 	
 	//TODO:
@@ -412,7 +412,7 @@ public class Host
 	}
 	
 	/**
-	 * Returns whether or not the host is interested in the peer pieces.
+	 * Sets host as being interested in the peer.
 	 * 
 	 * @param peerID	the peer id of the peer
 	 * 

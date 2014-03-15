@@ -142,6 +142,17 @@ public class Host
 	}
 		
 	/**
+	 * Returns if the peer associated with the peerID is choked or not
+	 * 
+	 * @param peerID	the peer id of the peer
+	 * 
+	 */	
+	public static synchronized boolean peerIsChoked (int peerID) {
+		if (Host.lookup.isEmpty()) {return true;} //TODO: do I need this?
+		return Host.lookup.get(peerID).choked;
+	}
+	
+	/**
 	 * Allows the user to add a peer and associated socket to the lookup map.  
 	 * 
 	 * @param peerID	the peer id of the connected peer
@@ -172,6 +183,7 @@ public class Host
 
 	/**
 	 * Updates the bitfield record for a given peer using the piece info.
+	 * This is overloaded.
 	 * 
 	 * @param peerID	the peer id of the peer
 	 * @param piece		the piece that needs to be updated in the bitfield
@@ -180,35 +192,62 @@ public class Host
 	public static synchronized void updatePeerBitfield (int peerID, int chunkID) 
 	{
 		Host.lookup.get(peerID).bitfield.set(chunkID);
-		//TODO:determine if host are interested still or not in all peers
+
+		Iterator<Entry<Integer, HostEntry>> it = Host.lookup.entrySet().iterator();
+        while (it.hasNext()) {
+        	Map.Entry<Integer, HostEntry> entry = (Map.Entry<Integer, HostEntry>)it.next();
+        	BitSet result = Host.compare(entry.getValue().bitfield, Host.bitfield);
+        	if (result.isEmpty()) {
+        		entry.getValue().hostInterested = false;
+        	}
+        	else {
+        		entry.getValue().hostInterested = true;
+        	}
+        }
 	}
 	
+	/**
+	 * Updates the bitfield record for a given peer using the piece info.
+	 * This is overloaded
+	 * 
+	 * @param peerID	the peer id of the peer
+	 * @param bitfield	the bitset the bitfield of the peer will be set to
+	 * 
+	 */
 	public static synchronized void updatePeerBitfield (int peerID, BitSet bitfield) {
 		
 		Host.lookup.get(peerID).bitfield = bitfield;
-		//TODO: determine if the peer has bits we are interested in
-	}
-	
-	
-	public static void updatePeerBitfield () {
 		
+		Iterator<Entry<Integer, HostEntry>> it = Host.lookup.entrySet().iterator();
+        while (it.hasNext()) {
+        	Map.Entry<Integer, HostEntry> entry = (Map.Entry<Integer, HostEntry>)it.next();
+        	BitSet result = Host.compare(entry.getValue().bitfield, Host.bitfield);
+        	if (result.isEmpty()) {
+        		entry.getValue().hostInterested = false;
+        	}
+        	else {
+        		entry.getValue().hostInterested = true;
+        	}
+        }
 	}
 
 	/**
-	 * Returns if the peer associated with the peerID is choked or not
+	 * Sets the host to be choked by this peer
 	 * 
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */	
-	public static synchronized boolean peerIsChoked (int peerID) {
-		if (Host.lookup.isEmpty()) {return true;} //TODO: do I need this?
-		return Host.lookup.get(peerID).choked;
-	}
-	
 	public static synchronized void chokedBy (int peerID) 
 	{
 		Host.lookup.get(peerID).choking = true;
 	}
+	
+	/**
+	 * Sets the host to be unchoked by this peer
+	 * 
+	 * @param peerID	the peer id of the peer
+	 * 
+	 */	
 	public static synchronized void unchokedBy (int peerID) 
 	{
 		Host.lookup.get(peerID).choking = false;
@@ -225,26 +264,6 @@ public class Host
 		return Host.lookup.get(peerID).choking;
 	}
 	
-	/**
-	 * Returns true/false for whether or not the peer associated with the peerID is choking the host.
-	 * 
-	 * @param peerID	the peer id of the peer
-	 * 
-	 */
-
-	
-	/**
-	 * Updates the bitfield record for the host using the piece info.
-	 * 
-	 * @param chunkID	the chunk id of the piece sent by the peer
-	 * @param peerID	the peer id of the computer that is sending the pieced
-	 * 
-	 */
-	public static synchronized void updatePiece (int chunkID, int peerID) {
-		//TODO: make bitfield for host and set to 0 at start then to 1 as chunkIDs come in
-		//add 1 to counter for that peerID to be used in determining topK
-	}
-
 	/**
 	 * Sets the field to let the host know the peer is interested in the its pieces.
 	 * 
@@ -266,7 +285,7 @@ public class Host
 	{
 		Host.lookup.get(peerID).peerInterested = false;
 	}
-	
+
 	/**
 	 * Returns whether or not the host is interested in the peer pieces.
 	 * 
@@ -277,11 +296,51 @@ public class Host
 		return Host.lookup.get(peerID).hostInterested;
 	}
 	
+	/**
+	 * Sets the field to let the host know the peer is NOT interested in its pieces.
+	 * 
+	 * @param peerID	the peer id of the peer
+	 * 
+	 */
+	public ArrayList<TorrentSocket> getSocketList () {
+		ArrayList<TorrentSocket> result = new ArrayList <TorrentSocket>();
+		
+		Iterator<Entry<Integer, HostEntry>> it = Host.lookup.entrySet().iterator();
+        while (it.hasNext()) {
+        	Map.Entry<Integer, HostEntry> entry = (Map.Entry<Integer, HostEntry>)it.next();
+        	result.add(entry.getValue().socket);
+        }
+        
+		return result;
+	}
+	
+	
+	
+	
+	
+	/**
+	 * Updates the bitfield record for the host using the piece info.
+	 * 
+	 * @param chunkID	the chunk id of the piece sent by the peer
+	 * @param peerID	the peer id of the computer that is sending the pieced
+	 * 
+	 */
+	public static synchronized void updatePiece (int chunkID, int peerID) {
+		//TODO: make bitfield for host and set to 0 at start then to 1 as chunkIDs come in
+		//add 1 to counter for that peerID to be used in determining topK
+	}
+
+
+	
+
+	
 	//TODO:
-	public int getRandomChunkID(int peerID) {
+	public static int getRandomChunkID(int peerID) {
 		return 1;
 		//get random piece from among those the peer has that host dosn't have
 	}
+	
+
 
 	//TODO:
 	public static synchronized boolean everyoneHasFile() {
@@ -343,6 +402,13 @@ public class Host
         //so go through the lookup and if the unchoked value at the peer changes send a choke/unchoke message
         //then update the lookup table acordingly updating who is choked and unchoked.
         
+	}
+	
+	private static synchronized BitSet compare(BitSet peer, BitSet host) {
+		host.flip(0, host.size());
+		host.and(peer);
+		return peer;
+		
 	}
 	
 	/**

@@ -102,6 +102,13 @@ public class PeerProcess
 					serverThread.start();
 		
 				}
+				if(readPeerID==hostID)
+				{
+					tokens.nextToken();
+					tokens.nextToken();
+					int val=Integer.parseInt(tokens.nextToken());
+					Host.setFile(val);
+				}
 				
 			}
 			

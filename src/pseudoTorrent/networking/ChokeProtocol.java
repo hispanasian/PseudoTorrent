@@ -27,6 +27,7 @@ public class ChokeProtocol extends Protocol
 		Host.chokedBy(((TorrentSocket) protocols.getSocket()).getPeerID());
 		
 		// TODO: If unchoked, tell host to remove the random from 
+		((TorrentSocket) protocols.getSocket()).request = null;
 		
 	} /* end receiveProtocol method */
 

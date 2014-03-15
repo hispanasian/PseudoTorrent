@@ -36,7 +36,7 @@ public class Host
 	
 	protected static Hashtable<Integer, HostEntry> lookup;
 	
-	protected static int numPieces;
+	public static int numPieces;
 	protected static int numPrefNeighbors;
 	protected static int unchokeInterval;
 	protected static int optimisticUnchokeInterval;	

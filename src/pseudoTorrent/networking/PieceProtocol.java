@@ -82,6 +82,14 @@ public class PieceProtocol extends Protocol
 			e.printStackTrace();
 		} /* end catch */
 		
+		/* If done, log the completion of the file */
+		int chunksObtained = Host.getHostBitfield().cardinality();
+		if(chunksObtained >= Host.numPieces)
+		{
+			/* File completed, log completion */
+			Host.log.logCompletion();
+		} /* end if */
+		
 	} /* end receiveProtocol method */
 
 } /* end ChokeProtocol class */

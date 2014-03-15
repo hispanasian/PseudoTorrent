@@ -24,7 +24,22 @@ public class UnchokeProtocol extends Protocol
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		Host.unchokedBy(((TorrentSocket) protocols.getSocket()).getPeerID());
+		int peerID = ((TorrentSocket) protocols.getSocket()).getPeerID();
+		Host.unchokedBy(peerID);
+		if(Host.isInterested(peerID))
+		{
+			int chunk = Host.getRandomChunkID(peerID);
+			Message req = new Message(Message.Type.REQUESET, chunk);
+			try 
+			{
+				protocols.process(req, Protocol.Stance.SENDING);
+			} /* end try */
+			catch (Exception e) 
+			{
+				// TODO determine what to do
+			} /* end catch */
+			
+		} /* end if */
 		
 	} /* end receiveProtocol method */
 

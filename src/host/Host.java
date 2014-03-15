@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+
+import filechunk.ByteReadAndWrite;
 import pseudoTorrent.TorrentLogger;
 import pseudoTorrent.networking.*;
 
@@ -46,6 +48,7 @@ public class Host
 	
 	protected static BitSet bitfield;
 	public static TorrentLogger log;
+	public static ByteReadAndWrite file;
 	
 	/******************* Class Methods *******************/
 	
@@ -75,6 +78,8 @@ public class Host
 		Host.optimisticUnchokedPeer = -1;
 		Host.hostID = -1;
 		Host.bitfield = new BitSet(numPieces);
+		// TODO: Host.file initialize
+		
 		try {
 			Host.log = new TorrentLogger(hostID, logPath);
 		} catch (IOException e) {
@@ -278,7 +283,7 @@ public class Host
 	}
 	
 	//TODO:
-	public int getRandomChunkID(int peerID) {
+	public static int getRandomChunkID(int peerID) {
 		return 1;
 		//get random piece from among those the peer has that host dosn't have
 	}

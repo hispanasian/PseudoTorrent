@@ -1,5 +1,6 @@
 package pseudoTorrent.networking;
 
+import host.Host;
 import networking.Protocol;
 import networking.ProtocolMessage;
 import networking.ProtocolPackage;
@@ -16,14 +17,25 @@ public class PieceProtocol extends Protocol
 	@Override
 	public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		int peerID = ((TorrentSocket) protocols.getSocket()).getPeerID();
+		int chunk = ((TorrentSocket) protocols.getSocket()).request;
+		Host.log.logDownloadingPiece(peerID, chunk, Host.getHostBitfield().cardinality());
 		
 	} /* end sendProtocol method */
 
 	@Override
 	public void receiveProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
+		int chunkID = ((TorrentSocket) protocols.getSocket()).request;
+		Message chunk = (Message) message;
+		
+		/* Store chunk and update host */
+		Host.file.giveChunk(chunkID, chunk.payload);
+		Host.updateHostBitfield(chunkID);
+		
+		/* Send Have to peers */
+		
+		/* If interested, send request. Else, send not interested */
 		
 	} /* end receiveProtocol method */
 

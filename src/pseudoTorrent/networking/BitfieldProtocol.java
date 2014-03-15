@@ -19,8 +19,7 @@ public class BitfieldProtocol extends Protocol
 	@Override
 	public void sendProtocol(ProtocolPackage protocols, ProtocolMessage message) 
 	{
-		// TODO Auto-generated method stub
-		
+			//we dont need this method as bitfield protocol does not need to be logged 
 		
 	} /* end sendProtocol method */
 
@@ -38,15 +37,13 @@ public class BitfieldProtocol extends Protocol
 		 if(interest)
 		 {
 			 Message msg= new Message(Message.Type.INTERESTED);
-			 ((TorrentSocket)protocols.getSocket()).sendMessage(msg);
+			protocols.getSocket().protocolSendMessage(msg);
 		 }
 		 else
 		 {
 			 Message msg= new Message(Message.Type.NOT_INTERESTED);
-			 ((TorrentSocket)protocols.getSocket()).sendMessage(msg);
+			 protocols.getSocket().protocolSendMessage(msg);
 		 }
-		 
-		//if its interested then it sends an interested message
 		// TODO Auto-generated method stub
 		
 		

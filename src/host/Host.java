@@ -74,6 +74,7 @@ public class Host
 		Host.AllRank = new ArrayList <PeerRankEntry> ();
 		Host.optimisticUnchokedPeer = -1;
 		Host.hostID = -1;
+		Host.bitfield = new BitSet(numPieces);
 		try {
 			Host.log = new TorrentLogger(hostID, logPath);
 		} catch (IOException e) {
@@ -152,10 +153,48 @@ public class Host
 	{
 		Host.lookup.put(peerID, new HostEntry(socket));
 	}
+	
+	/**
+	 * Allows the host to set its bitfield to either having the file (all 1s/true)
+	 * or not having the file (all 0s/false)  
+	 * 
+	 * @param hasFile	the value 1 represents the host has the file, 0 otherwise
+	 * 
+	 */
+	public static void setFile(int hasFile) {
+		if (hasFile == 1) {
+			Host.bitfield.clear();
+			Host.bitfield.flip(0, Host.numPieces);
+		}
+		else {
+			//TODO: error
+		}
+	}
 
+	/**
+	 * Updates the bitfield record for a given peer using the piece info.
+	 * 
+	 * @param peerID	the peer id of the peer
+	 * @param piece		the piece that needs to be updated in the bitfield
+	 * 
+	 */
+	public static synchronized void updatePeerBitfield (int peerID, int chunkID) 
+	{
+		Host.lookup.get(peerID).bitfield.set(chunkID);
+		//TODO:determine if host are interested still or not in all peers
+	}
+	
+	public static synchronized void updatePeerBitfield (int peerID, BitSet bitfield) {
+		
+		Host.lookup.get(peerID).bitfield = bitfield;
+		//TODO: determine if the peer has bits we are interested in
+	}
 	
 	
-	
+	public static void updatePeerBitfield () {
+		
+	}
+
 	/**
 	 * Returns if the peer associated with the peerID is choked or not
 	 * 
@@ -180,20 +219,6 @@ public class Host
 	public static synchronized boolean peerIsChoking (int peerID) 
 	{
 		return Host.lookup.get(peerID).choking;
-	}
-	
-	/**
-	 * Updates the bitfield record for a given peer using the piece info.
-	 * 
-	 * @param peerID	the peer id of the peer
-	 * @param piece		the piece that needs to be updated in the bitfield
-	 * 
-	 */
-	public static synchronized void updatePeerBitfield (int peerID, int chunkID) 
-	{
-		Host.lookup.get(peerID).bitfield.set(chunkID);
-		//TODO:determine if host are interested still or not in all peers
-		//send message to the peer to notify if not interested.
 	}
 	
 	/**
@@ -241,8 +266,9 @@ public class Host
 	}
 	
 	//TODO:
-	public int getRandomChunkID() {
+	public int getRandomChunkID(int peerID) {
 		return 1;
+		//get random piece from among those the peer has that host dosn't have
 	}
 
 	//TODO:

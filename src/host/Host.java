@@ -459,6 +459,8 @@ public class Host
     					// TODO Auto-generated catch block
     					e1.printStackTrace();
     				}
+            		Integer[] a = null;
+            		Host.log.logChangePreferredNeighbors(UnchokedTopK.toArray(a));
             	}
             }
         }
@@ -497,6 +499,7 @@ public class Host
 				if (Host.Choked.get(index).isInterested) {
 			        Host.optimisticUnchokedPeer = Host.Choked.get(index).peerID;
 			        Message m = new Message (Message.Type.UNCHOKE);
+			        Host.log.logChangeOptimisticallyUnchokedNeighbor(optimisticUnchokedPeer);
 			        try {
 						Host.lookup.get(optimisticUnchokedPeer).socket.sendMessage(m);
 					} catch (InstantiationException e) {
@@ -550,7 +553,7 @@ public class Host
 	 * @param peerID	the peer id of the peer
 	 * 
 	 */
-	private synchronized int getBitsRecieved (int peerID) 
+	private static synchronized int getBitsRecieved (int peerID) 
 	{
 		return Host.lookup.get(peerID).bitsReceived;
 	}
